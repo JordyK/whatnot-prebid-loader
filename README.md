@@ -1,4 +1,4 @@
-# Card Review
+# Whatnot Prebid Loader
 
 A single-purpose web tool for reviewing AI-generated sports card listings before they go live on Whatnot. Built as a clean, extensible foundation for future multi-tenant SaaS capabilities.
 
