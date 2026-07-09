@@ -30,9 +30,10 @@ interface CardViewProps {
   isSaving: boolean;
   onLogout: () => void;
   onBack: () => void;
+  onSettings: () => void;
 }
 
-export function CardView({ card, confirmedCount, totalCount, onConfirm, isSaving, onLogout, onBack }: CardViewProps) {
+export function CardView({ card, confirmedCount, totalCount, onConfirm, isSaving, onLogout, onBack, onSettings }: CardViewProps) {
   const { theme, toggleTheme } = useTheme();
   const [title, setTitle] = useState(card.ai_title);
   const [description, setDescription] = useState(card.ai_description);
@@ -69,6 +70,13 @@ export function CardView({ card, confirmedCount, totalCount, onConfirm, isSaving
   return (
     <div className="card-view">
       <div className="card-header">
+        <button
+          className="settings-btn"
+          onClick={onSettings}
+          aria-label="Settings"
+        >
+          ⚙️
+        </button>
         <button
           className="theme-toggle"
           onClick={toggleTheme}

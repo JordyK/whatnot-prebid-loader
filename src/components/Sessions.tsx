@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { getUserSessions, createSession, deleteSession } from '../services/database';
+import { getUserSessions, createSession, deleteSession, getUserSettings } from '../services/database';
 import type { SessionWithCardCount } from '../services/database';
 import { getConfirmedCards } from '../services/database';
 import { generateCSV, downloadCSV } from '../utils/csvExport';
 import { useTheme } from '../hooks/useTheme';
 import { StatusBadge } from './StatusBadge';
+import { supabase } from '../lib/supabase';
 
 interface SessionsProps {
   userId: string;
@@ -12,10 +13,11 @@ interface SessionsProps {
   onUploadMore: (sessionId: string) => void;
   onNewSessionCreated: (sessionId: string) => void;
   onLogout: () => void;
+  onSettings: () => void;
   refreshTrigger?: number;
 }
 
-export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessionCreated, onLogout, refreshTrigger }: SessionsProps) {
+export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessionCreated, onLogout, onSettings, refreshTrigger }: SessionsProps) {
   const { theme, toggleTheme } = useTheme();
   const [sessions, setSessions] = useState<SessionWithCardCount[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,7 +70,26 @@ export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessi
         setError('No confirmed cards to export');
         return;
       }
-      const csv = generateCSV(cards);
+
+      // Get user settings for CSV export
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const userSettings = await getUserSettings(user.id);
+      if (!userSettings) {
+        throw new Error('User settings not found');
+      }
+
+      const csv = generateCSV(cards, {
+        kategorie: userSettings.kategorie || 'Sportkarten',
+        unterkategorie: userSettings.unterkategorie || 'Fußball Singles',
+        verkaufsformat: userSettings.verkaufsformat || 'Auction',
+        preis: userSettings.preis || '1',
+        versandprofil: userSettings.versandprofil || 'Pack (50 g)',
+        zustand: userSettings.zustand || 'Raw - Very Good',
+      });
       downloadCSV(csv);
     } catch (err: any) {
       setError(err.message || 'Failed to export CSV');
@@ -107,6 +128,13 @@ export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessi
     return (
       <div className="sessions-container">
         <button
+          className="settings-btn"
+          onClick={onSettings}
+          aria-label="Settings"
+        >
+          ⚙️
+        </button>
+        <button
           className="theme-toggle"
           onClick={toggleTheme}
           aria-label="Toggle theme"
@@ -123,6 +151,13 @@ export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessi
 
   return (
     <div className="sessions-container">
+      <button
+        className="settings-btn"
+        onClick={onSettings}
+        aria-label="Settings"
+      >
+        ⚙️
+      </button>
       <button
         className="theme-toggle"
         onClick={toggleTheme}

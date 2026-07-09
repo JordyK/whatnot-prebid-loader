@@ -24,20 +24,29 @@ const CSV_HEADERS = [
   'Bild-URL 8',
 ];
 
-export function generateCSV(cards: Card[]): string {
+interface UserSettings {
+  kategorie: string;
+  unterkategorie: string;
+  verkaufsformat: string;
+  preis: string;
+  versandprofil: string;
+  zustand: string;
+}
+
+export function generateCSV(cards: Card[], userSettings: UserSettings): string {
   const rows = cards.map((card) => {
     return [
-      'Sportkarten',
-      'Fußball Singles',
+      userSettings.kategorie,
+      userSettings.unterkategorie,
       card.final_title || card.ai_title,
       card.final_description || card.ai_description,
       '1',
-      'Auction',
-      String(card.starting_price || 1),
-      card.shipping_profile || 'Pack (50 g)',
+      userSettings.verkaufsformat,
+      userSettings.preis,
+      card.shipping_profile || userSettings.versandprofil,
       '',
       '',
-      card.condition || 'Raw - Very Good',
+      card.condition || userSettings.zustand,
       '',
       '',
       card.image_url,

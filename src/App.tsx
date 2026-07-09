@@ -8,6 +8,7 @@ import { Upload } from './components/Upload';
 import { CardView } from './components/CardView';
 import { Export } from './components/Export';
 import { Loading } from './components/Loading';
+import { Settings } from './components/Settings';
 
 type AppState = 
   | { type: 'auth' }
@@ -15,6 +16,7 @@ type AppState =
   | { type: 'upload'; sessionId: string }
   | { type: 'review'; sessionId: string; cards: Card[]; currentIndex: number; isSaving: boolean }
   | { type: 'export'; sessionId: string; isReExport: boolean }
+  | { type: 'settings' }
   | { type: 'loading' }
   | { type: 'error'; message: string };
 
@@ -116,6 +118,14 @@ export function App() {
     setState({ type: 'upload', sessionId });
   }, []);
 
+  const handleSettings = useCallback(() => {
+    setState({ type: 'settings' });
+  }, []);
+
+  const handleBackFromSettings = useCallback(() => {
+    setState({ type: 'sessions' });
+  }, []);
+
   const handleUploadComplete = (sessionId: string) => {
     loadPendingCards(sessionId);
   };
@@ -201,6 +211,7 @@ export function App() {
         onUploadMore={handleUploadMore}
         onNewSessionCreated={handleNewSessionCreated}
         onLogout={handleLogout}
+        onSettings={handleSettings}
         refreshTrigger={sessionsRefreshTrigger}
       />
     );
@@ -212,6 +223,7 @@ export function App() {
         sessionId={state.sessionId}
         onUploadComplete={handleUploadComplete}
         onLogout={handleLogout}
+        onSettings={handleSettings}
       />
     );
   }
@@ -227,6 +239,7 @@ export function App() {
         isSaving={state.isSaving}
         onLogout={handleLogout}
         onBack={handleBackToSessions}
+        onSettings={handleSettings}
       />
     );
   }
@@ -239,6 +252,16 @@ export function App() {
         onNewSession={handleBackToSessions}
         onBackToShows={handleBackToSessions}
         onLogout={handleLogout}
+      />
+    );
+  }
+
+  if (state.type === 'settings') {
+    return (
+      <Settings 
+        userId={user!.id}
+        onLogout={handleLogout}
+        onBack={handleBackFromSettings}
       />
     );
   }

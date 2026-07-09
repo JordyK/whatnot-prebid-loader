@@ -202,3 +202,65 @@ export interface SessionWithCardCount extends Session {
   card_count: number;
   pending_count: number;
 }
+
+export interface UserSettings {
+  user_id: string;
+  kategorie: string;
+  unterkategorie: string;
+  verkaufsformat: string;
+  preis: string;
+  versandprofil: string;
+  zustand: string;
+  monthly_card_limit: number;
+}
+
+export async function getUserSettings(userId: string): Promise<UserSettings | null> {
+  const { data, error } = await supabase
+    .from('user_settings')
+    .select('*')
+    .eq('user_id', userId)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') return null; // No rows returned
+    throw error;
+  }
+
+  return data;
+}
+
+export async function updateUserSettings(userId: string, settings: Partial<UserSettings>): Promise<void> {
+  const { error } = await supabase
+    .from('user_settings')
+    .update(settings)
+    .eq('user_id', userId);
+
+  if (error) throw error;
+}
+
+export async function getUsageStats(userId: string): Promise<{ total: number; thisMonth: number }> {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+  // Get total count
+  const { count: totalCount, error: totalError } = await supabase
+    .from('usage_events')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+
+  if (totalError) throw totalError;
+
+  // Get this month's count
+  const { count: monthCount, error: monthError } = await supabase
+    .from('usage_events')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .gte('created_at', startOfMonth);
+
+  if (monthError) throw monthError;
+
+  return {
+    total: totalCount || 0,
+    thisMonth: monthCount || 0,
+  };
+}

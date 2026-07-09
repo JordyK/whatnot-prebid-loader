@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { getConfirmedCards, completeSession } from '../services/database';
+import { getConfirmedCards, completeSession, getUserSettings } from '../services/database';
 import { generateCSV, downloadCSV } from '../utils/csvExport';
 import { useTheme } from '../hooks/useTheme';
+import { supabase } from '../lib/supabase';
 
 interface ExportProps {
   sessionId: string;
@@ -29,7 +30,25 @@ export function Export({ sessionId, isReExport, onNewSession, onBackToShows, onL
         return;
       }
 
-      const csv = generateCSV(cards);
+      // Get user settings for CSV export
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const userSettings = await getUserSettings(user.id);
+      if (!userSettings) {
+        throw new Error('User settings not found');
+      }
+
+      const csv = generateCSV(cards, {
+        kategorie: userSettings.kategorie || 'Sportkarten',
+        unterkategorie: userSettings.unterkategorie || 'Fußball Singles',
+        verkaufsformat: userSettings.verkaufsformat || 'Auction',
+        preis: userSettings.preis || '1',
+        versandprofil: userSettings.versandprofil || 'Pack (50 g)',
+        zustand: userSettings.zustand || 'Raw - Very Good',
+      });
       downloadCSV(csv);
       
       // Only complete session if this is not a re-export

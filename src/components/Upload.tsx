@@ -7,9 +7,10 @@ interface UploadProps {
   sessionId: string;
   onUploadComplete: (sessionId: string) => void;
   onLogout: () => void;
+  onSettings: () => void;
 }
 
-export function Upload({ sessionId, onUploadComplete, onLogout }: UploadProps) {
+export function Upload({ sessionId, onUploadComplete, onLogout, onSettings }: UploadProps) {
   const { theme, toggleTheme } = useTheme();
   const [files, setFiles] = useState<File[]>([]);
   const [processing, setProcessing] = useState(false);
@@ -84,6 +85,13 @@ export function Upload({ sessionId, onUploadComplete, onLogout }: UploadProps) {
 
   return (
     <div className="upload-container">
+      <button
+        className="settings-btn"
+        onClick={onSettings}
+        aria-label="Settings"
+      >
+        ⚙️
+      </button>
       <button
         className="theme-toggle"
         onClick={toggleTheme}
