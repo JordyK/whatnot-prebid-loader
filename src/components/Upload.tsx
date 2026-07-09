@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { insertCard } from '../services/database';
 import { processCard } from '../services/cardProcessing';
+import { useTheme } from '../hooks/useTheme';
 
 interface UploadProps {
   sessionId: string;
@@ -9,6 +10,7 @@ interface UploadProps {
 }
 
 export function Upload({ sessionId, onUploadComplete, onLogout }: UploadProps) {
+  const { theme, toggleTheme } = useTheme();
   const [files, setFiles] = useState<File[]>([]);
   const [processing, setProcessing] = useState(false);
   const [processed, setProcessed] = useState(0);
@@ -82,6 +84,13 @@ export function Upload({ sessionId, onUploadComplete, onLogout }: UploadProps) {
 
   return (
     <div className="upload-container">
+      <button
+        className="theme-toggle"
+        onClick={toggleTheme}
+        aria-label="Toggle theme"
+      >
+        {theme === 'dark' ? '☀️' : '🌙'}
+      </button>
       <button className="logout-btn" onClick={onLogout}>
         Log out
       </button>

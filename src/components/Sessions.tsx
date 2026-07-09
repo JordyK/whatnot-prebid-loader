@@ -3,6 +3,8 @@ import { getUserSessions, createSession, deleteSession } from '../services/datab
 import type { SessionWithCardCount } from '../services/database';
 import { getConfirmedCards } from '../services/database';
 import { generateCSV, downloadCSV } from '../utils/csvExport';
+import { useTheme } from '../hooks/useTheme';
+import { StatusBadge } from './StatusBadge';
 
 interface SessionsProps {
   userId: string;
@@ -14,6 +16,7 @@ interface SessionsProps {
 }
 
 export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessionCreated, onLogout, refreshTrigger }: SessionsProps) {
+  const { theme, toggleTheme } = useTheme();
   const [sessions, setSessions] = useState<SessionWithCardCount[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -103,6 +106,13 @@ export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessi
   if (loading) {
     return (
       <div className="sessions-container">
+        <button
+          className="theme-toggle"
+          onClick={toggleTheme}
+          aria-label="Toggle theme"
+        >
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
         <button className="logout-btn" onClick={onLogout}>
           Log out
         </button>
@@ -113,6 +123,13 @@ export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessi
 
   return (
     <div className="sessions-container">
+      <button
+        className="theme-toggle"
+        onClick={toggleTheme}
+        aria-label="Toggle theme"
+      >
+        {theme === 'dark' ? '☀️' : '🌙'}
+      </button>
       <button className="logout-btn" onClick={onLogout}>
         Log out
       </button>
@@ -173,9 +190,11 @@ export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessi
                     <div className="session-name">{session.name || 'Untitled Show'}</div>
                     <div className="session-date">{formatDate(session.created_at)}</div>
                     <div className="session-status">
-                      <span className={`status-badge status-${session.status}`}>
-                        {session.status === 'in_progress' ? 'In Progress' : 'Completed'}
-                      </span>
+                      <StatusBadge
+                        status={session.status === 'in_progress' ? 'info' : 'success'}
+                        icon={session.status === 'in_progress' ? '⏳' : '✓'}
+                        label={session.status === 'in_progress' ? 'In Progress' : 'Completed'}
+                      />
                       <span className="session-count">
                         {session.card_count} cards
                         {session.pending_count > 0 && (

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { getConfirmedCards, completeSession } from '../services/database';
 import { generateCSV, downloadCSV } from '../utils/csvExport';
+import { useTheme } from '../hooks/useTheme';
 
 interface ExportProps {
   sessionId: string;
@@ -11,6 +12,7 @@ interface ExportProps {
 }
 
 export function Export({ sessionId, isReExport, onNewSession, onBackToShows, onLogout }: ExportProps) {
+  const { theme, toggleTheme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [exported, setExported] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,11 +47,18 @@ export function Export({ sessionId, isReExport, onNewSession, onBackToShows, onL
 
   return (
     <div className="export-container">
+      <button
+        className="theme-toggle"
+        onClick={toggleTheme}
+        aria-label="Toggle theme"
+      >
+        {theme === 'dark' ? '☀️' : '🌙'}
+      </button>
       <button className="logout-btn" onClick={onLogout}>
         Log out
       </button>
 
-      <div className="export-content">
+      <div className="export-content glass-panel">
         <h1 className="export-title">
           {isReExport ? 'Export Again' : 'Export Complete'}
         </h1>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Card } from '../types';
+import { useTheme } from '../hooks/useTheme';
 
 const SHIPPING_PROFILES = [
   'Kleine Hobbybox (bis zu 10 Boosterpacks)',
@@ -32,6 +33,7 @@ interface CardViewProps {
 }
 
 export function CardView({ card, confirmedCount, totalCount, onConfirm, isSaving, onLogout, onBack }: CardViewProps) {
+  const { theme, toggleTheme } = useTheme();
   const [title, setTitle] = useState(card.ai_title);
   const [description, setDescription] = useState(card.ai_description);
   const [startingPrice, setStartingPrice] = useState(card.starting_price || 1);
@@ -67,6 +69,13 @@ export function CardView({ card, confirmedCount, totalCount, onConfirm, isSaving
   return (
     <div className="card-view">
       <div className="card-header">
+        <button
+          className="theme-toggle"
+          onClick={toggleTheme}
+          aria-label="Toggle theme"
+        >
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
         <button className="btn btn-secondary btn-sm" onClick={onBack}>
           ← Back
         </button>
