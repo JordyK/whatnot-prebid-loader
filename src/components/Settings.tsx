@@ -5,6 +5,12 @@ import { deleteAccount } from '../services/accountService';
 import { useTheme } from '../hooks/useTheme';
 import { StatusBadge } from './StatusBadge';
 
+const SALES_FORMATS = [
+  'Auction',
+  'Buy it Now',
+  'Giveaway',
+];
+
 const SHIPPING_PROFILES = [
   'Kleine Hobbybox (bis zu 10 Boosterpacks)',
   'Mittlere Hobbybox (bis zu 24 Boosterpacks)',
@@ -253,14 +259,18 @@ export function Settings({ userId, onLogout, onBack }: SettingsProps) {
           
           <div className="field-group">
             <label className="field-label">Sales Format</label>
-            <input
-              type="text"
-              value={settingsForm.verkaufsformat || ''}
+            <select
+              value={settingsForm.verkaufsformat || 'Auction'}
               onChange={(e) => setSettingsForm({ ...settingsForm, verkaufsformat: e.target.value })}
               className="field-input"
               disabled={savingSettings}
-              placeholder="e.g. Auction"
-            />
+            >
+              {SALES_FORMATS.map((format) => (
+                <option key={format} value={format}>
+                  {format}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="field-group">
