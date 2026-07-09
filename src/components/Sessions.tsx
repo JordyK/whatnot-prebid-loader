@@ -7,12 +7,13 @@ import { generateCSV, downloadCSV } from '../utils/csvExport';
 interface SessionsProps {
   userId: string;
   onNavigateToSession: (sessionId: string) => void;
+  onUploadMore: (sessionId: string) => void;
   onNewSessionCreated: (sessionId: string) => void;
   onLogout: () => void;
   refreshTrigger?: number;
 }
 
-export function Sessions({ userId, onNavigateToSession, onNewSessionCreated, onLogout, refreshTrigger }: SessionsProps) {
+export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessionCreated, onLogout, refreshTrigger }: SessionsProps) {
   const [sessions, setSessions] = useState<SessionWithCardCount[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -188,7 +189,7 @@ export function Sessions({ userId, onNavigateToSession, onNewSessionCreated, onL
                       <>
                         <button
                           className="btn btn-secondary btn-sm"
-                          onClick={() => onNavigateToSession(session.id)}
+                          onClick={() => onUploadMore(session.id)}
                         >
                           Upload More
                         </button>

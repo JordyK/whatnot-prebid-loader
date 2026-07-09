@@ -108,6 +108,14 @@ export function App() {
     setState({ type: 'upload', sessionId });
   }, []);
 
+  const handleUploadMore = useCallback((sessionId: string) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('session', sessionId);
+    window.history.pushState({}, '', url.toString());
+    // Always go to upload screen for upload more
+    setState({ type: 'upload', sessionId });
+  }, []);
+
   const handleUploadComplete = (sessionId: string) => {
     loadPendingCards(sessionId);
   };
@@ -190,6 +198,7 @@ export function App() {
       <Sessions 
         userId={user!.id}
         onNavigateToSession={handleNavigateToSession}
+        onUploadMore={handleUploadMore}
         onNewSessionCreated={handleNewSessionCreated}
         onLogout={handleLogout}
         refreshTrigger={sessionsRefreshTrigger}
