@@ -21,6 +21,7 @@ type AppState =
 export function App() {
   const { user, loading: authLoading, signIn, signUp, signOut } = useAuth();
   const [state, setState] = useState<AppState>({ type: 'loading' });
+  const [sessionsRefreshTrigger, setSessionsRefreshTrigger] = useState(0);
 
   useEffect(() => {
     if (authLoading) return;
@@ -146,6 +147,8 @@ export function App() {
     const url = new URL(window.location.href);
     url.searchParams.delete('session');
     window.history.replaceState({}, '', url.toString());
+    // Increment refresh trigger to force sessions list reload
+    setSessionsRefreshTrigger(prev => prev + 1);
     setState({ type: 'sessions' });
   };
 
@@ -169,6 +172,7 @@ export function App() {
         onNavigateToSession={handleNavigateToSession}
         onNewSessionCreated={handleNewSessionCreated}
         onLogout={handleLogout}
+        refreshTrigger={sessionsRefreshTrigger}
       />
     );
   }
