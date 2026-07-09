@@ -5,6 +5,26 @@ import { deleteAccount } from '../services/accountService';
 import { useTheme } from '../hooks/useTheme';
 import { StatusBadge } from './StatusBadge';
 
+const SHIPPING_PROFILES = [
+  'Kleine Hobbybox (bis zu 10 Boosterpacks)',
+  'Mittlere Hobbybox (bis zu 24 Boosterpacks)',
+  'Große Hobbybox (bis zu 36 Boosterpacks)',
+  'Kleiner Break Spot (max. 15 Karten)',
+  'Mittlerer Break Spot (max. 30 Karten)',
+  'Großer Break Spot (max. 60 Karten)',
+  'Single (15 g)',
+  'Slab (90 g)',
+  'Pack (50 g)',
+];
+
+const CONDITIONS = [
+  'Graded',
+  'Raw - Near Mint or Better',
+  'Raw - Excellent',
+  'Raw - Very Good',
+  'Raw - Poor',
+];
+
 interface SettingsProps {
   userId: string;
   onLogout: () => void;
@@ -232,69 +252,59 @@ export function Settings({ userId, onLogout, onBack }: SettingsProps) {
           <h2 className="section-title">Listing Defaults</h2>
           
           <div className="field-group">
-            <label className="field-label">Kategorie</label>
-            <input
-              type="text"
-              value={settingsForm.kategorie || ''}
-              onChange={(e) => setSettingsForm({ ...settingsForm, kategorie: e.target.value })}
-              className="field-input"
-              disabled={savingSettings}
-            />
-          </div>
-
-          <div className="field-group">
-            <label className="field-label">Unterkategorie</label>
-            <input
-              type="text"
-              value={settingsForm.unterkategorie || ''}
-              onChange={(e) => setSettingsForm({ ...settingsForm, unterkategorie: e.target.value })}
-              className="field-input"
-              disabled={savingSettings}
-            />
-          </div>
-
-          <div className="field-group">
-            <label className="field-label">Verkaufsformat</label>
+            <label className="field-label">Sales Format</label>
             <input
               type="text"
               value={settingsForm.verkaufsformat || ''}
               onChange={(e) => setSettingsForm({ ...settingsForm, verkaufsformat: e.target.value })}
               className="field-input"
               disabled={savingSettings}
+              placeholder="e.g. Auction"
             />
           </div>
 
           <div className="field-group">
-            <label className="field-label">Preis</label>
+            <label className="field-label">Price</label>
             <input
               type="text"
               value={settingsForm.preis || ''}
               onChange={(e) => setSettingsForm({ ...settingsForm, preis: e.target.value })}
               className="field-input"
               disabled={savingSettings}
+              placeholder="e.g. 1"
             />
           </div>
 
           <div className="field-group">
-            <label className="field-label">Versandprofil</label>
-            <input
-              type="text"
+            <label className="field-label">Shipping Profile</label>
+            <select
               value={settingsForm.versandprofil || ''}
               onChange={(e) => setSettingsForm({ ...settingsForm, versandprofil: e.target.value })}
               className="field-input"
               disabled={savingSettings}
-            />
+            >
+              {SHIPPING_PROFILES.map((profile) => (
+                <option key={profile} value={profile}>
+                  {profile}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="field-group">
-            <label className="field-label">Zustand</label>
-            <input
-              type="text"
+            <label className="field-label">Condition</label>
+            <select
               value={settingsForm.zustand || ''}
               onChange={(e) => setSettingsForm({ ...settingsForm, zustand: e.target.value })}
               className="field-input"
               disabled={savingSettings}
-            />
+            >
+              {CONDITIONS.map((cond) => (
+                <option key={cond} value={cond}>
+                  {cond}
+                </option>
+              ))}
+            </select>
           </div>
 
           {settingsError && (

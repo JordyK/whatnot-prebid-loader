@@ -845,28 +845,6 @@ body {
   align-self: center;
 }
 
-/* Theme toggle button */
-.theme-toggle {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  padding: 8px 12px;
-  background: var(--glass-fill);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
-  border-radius: 8px;
-  font-size: 20px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  z-index: 100;
-}
-
-.theme-toggle:hover {
-  background: var(--glass-fill-elevated);
-  transform: scale(1.05);
-}
-
 /* Settings button */
 .settings-btn {
   position: absolute;
@@ -881,10 +859,32 @@ body {
   font-size: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
-  z-index: 100;
+  z-index: 101;
 }
 
 .settings-btn:hover {
+  background: var(--glass-fill-elevated);
+  transform: scale(1.05);
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 8px 12px;
+  background: var(--glass-fill);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 102;
+}
+
+.theme-toggle:hover {
   background: var(--glass-fill-elevated);
   transform: scale(1.05);
 }
