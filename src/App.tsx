@@ -73,11 +73,31 @@ export function App() {
     await signUp(email, password);
   }, [signUp]);
 
-  const handleNavigateToSession = useCallback((sessionId: string) => {
+  const handleNavigateToSession = useCallback(async (sessionId: string) => {
     const url = new URL(window.location.href);
     url.searchParams.set('session', sessionId);
     window.history.pushState({}, '', url.toString());
-    // The URL change will trigger the useEffect to re-route
+    
+    // Directly determine route and set state
+    try {
+      const pendingCount = await getPendingCardCount(sessionId);
+      const confirmedCards = await getConfirmedCards(sessionId);
+
+      if (pendingCount > 0) {
+        // Has pending cards → fetch them and show review screen
+        const pendingCards = await getPendingCards(sessionId);
+        setState({ type: 'review', sessionId, cards: pendingCards, currentIndex: 0, isSaving: false });
+      } else if (confirmedCards.length > 0) {
+        // All confirmed → show export screen
+        setState({ type: 'export', sessionId, isReExport: true });
+      } else {
+        // Zero cards → show upload screen (reuse empty session)
+        setState({ type: 'upload', sessionId });
+      }
+    } catch (error) {
+      console.error('Error loading session:', error);
+      setState({ type: 'sessions' });
+    }
   }, []);
 
   const handleNewSessionCreated = useCallback((sessionId: string) => {
