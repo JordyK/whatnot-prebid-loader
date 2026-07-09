@@ -1,51 +1,47 @@
-export interface CardData {
-  done: false;
-  row_id: string;
+// Supabase database types
+export type SessionStatus = 'in_progress' | 'completed';
+export type CardStatus = 'pending_review' | 'confirmed';
+
+export interface Session {
+  id: string;
+  user_id: string;
+  name: string;
+  status: SessionStatus;
+  created_at: string;
+}
+
+export interface Card {
+  id: string;
+  session_id: string;
   file_name: string;
   image_url: string;
+  brand_set: string | null;
+  player_name: string | null;
+  serial_number: string | null;
   ai_title: string;
   ai_description: string;
+  final_title: string | null;
+  final_description: string | null;
+  starting_price: number | null;
+  shipping_profile: string | null;
+  condition: string | null;
   needs_review: boolean;
   review_reason: string | null;
-  remaining: number;
+  status: CardStatus;
+  processed_at: string | null;
+  created_at: string;
 }
 
-export interface DoneResponse {
-  done: true;
-}
-
-export type GetCardResponse = CardData | DoneResponse;
-
-export interface ConfirmCardRequest {
-  row_id: string;
-  title: string;
-  description: string;
-  image_url: string;
+// n8n process card webhook response
+export interface ProcessCardResponse {
   file_name: string;
-  starting_price: number;
-  shipping_profile: string;
-  condition: string;
-}
-
-export interface ConfirmCardResponse {
-  success: true;
-}
-
-// Raw n8n webhook response format
-export interface N8nCardData {
-  row_number: number;
-  file_name: string;
-  file_link: string;
   image_url: string;
   title: string;
   description: string;
-  needs_review: string;
+  needs_review: string; // "TRUE" or "FALSE"
   review_reason: string;
   brand_set: string;
   player_name: string;
   serial_number: string;
   processed_at: string;
-  reviewed: string;
 }
-
-export type N8nResponse = N8nCardData[];

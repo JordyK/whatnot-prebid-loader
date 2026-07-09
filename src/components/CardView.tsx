@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { CardData } from '../types';
+import type { Card } from '../types';
 
 const SHIPPING_PROFILES = [
   'Kleine Hobbybox (bis zu 10 Boosterpacks)',
@@ -22,27 +22,29 @@ const CONDITIONS = [
 ];
 
 interface CardViewProps {
-  card: CardData;
+  card: Card;
   confirmedCount: number;
   totalCount: number;
   onConfirm: (title: string, description: string, startingPrice: number, shippingProfile: string, condition: string) => void;
   isSaving: boolean;
+  onLogout: () => void;
+  onBack: () => void;
 }
 
-export function CardView({ card, confirmedCount, totalCount, onConfirm, isSaving }: CardViewProps) {
+export function CardView({ card, confirmedCount, totalCount, onConfirm, isSaving, onLogout, onBack }: CardViewProps) {
   const [title, setTitle] = useState(card.ai_title);
   const [description, setDescription] = useState(card.ai_description);
-  const [startingPrice, setStartingPrice] = useState(1);
-  const [shippingProfile, setShippingProfile] = useState('Pack (50 g)');
-  const [condition, setCondition] = useState('Raw - Very Good');
+  const [startingPrice, setStartingPrice] = useState(card.starting_price || 1);
+  const [shippingProfile, setShippingProfile] = useState(card.shipping_profile || 'Pack (50 g)');
+  const [condition, setCondition] = useState(card.condition || 'Raw - Very Good');
 
   // Reset local state when card changes
   useEffect(() => {
     setTitle(card.ai_title);
     setDescription(card.ai_description);
-    setStartingPrice(1);
-    setShippingProfile('Pack (50 g)');
-    setCondition('Raw - Very Good');
+    setStartingPrice(card.starting_price || 1);
+    setShippingProfile(card.shipping_profile || 'Pack (50 g)');
+    setCondition(card.condition || 'Raw - Very Good');
   }, [card]);
 
   const handleSubmit = () => {
@@ -64,6 +66,15 @@ export function CardView({ card, confirmedCount, totalCount, onConfirm, isSaving
 
   return (
     <div className="card-view">
+      <div className="card-header">
+        <button className="btn btn-secondary btn-sm" onClick={onBack}>
+          ← Back
+        </button>
+        <button className="logout-btn" onClick={onLogout}>
+          Log out
+        </button>
+      </div>
+
       <div className="progress-container">
         <div className="progress-counter">
           {String(confirmedCount).padStart(3, '0')} / {String(totalCount).padStart(3, '0')}
@@ -165,7 +176,7 @@ export function CardView({ card, confirmedCount, totalCount, onConfirm, isSaving
         disabled={isSaving}
         type="button"
       >
-        {isSaving ? 'Saving...' : 'Confirm & Add to Export'}
+        {isSaving ? 'Saving...' : 'Confirm'}
       </button>
     </div>
   );
