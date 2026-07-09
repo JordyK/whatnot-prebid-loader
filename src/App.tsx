@@ -204,6 +204,7 @@ export function App() {
         sessionId={state.sessionId}
         isReExport={state.isReExport}
         onNewSession={handleBackToSessions}
+        onBackToShows={handleBackToSessions}
         onLogout={handleLogout}
       />
     );

@@ -6,10 +6,11 @@ interface ExportProps {
   sessionId: string;
   isReExport: boolean;
   onNewSession: () => void;
+  onBackToShows: () => void;
   onLogout: () => void;
 }
 
-export function Export({ sessionId, isReExport, onNewSession, onLogout }: ExportProps) {
+export function Export({ sessionId, isReExport, onNewSession, onBackToShows, onLogout }: ExportProps) {
   const [loading, setLoading] = useState(false);
   const [exported, setExported] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,12 +79,20 @@ export function Export({ sessionId, isReExport, onNewSession, onLogout }: Export
           </div>
         )}
 
-        <button
-          className="btn btn-secondary"
-          onClick={onNewSession}
-        >
-          Start New Session
-        </button>
+        <div className="export-actions">
+          <button
+            className="btn btn-secondary"
+            onClick={onBackToShows}
+          >
+            Back to Shows
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={onNewSession}
+          >
+            Start New Session
+          </button>
+        </div>
       </div>
     </div>
   );

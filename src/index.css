@@ -633,6 +633,13 @@ body {
   font-weight: 500;
 }
 
+.export-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 /* Sessions screen */
 .sessions-container {
   flex: 1;
