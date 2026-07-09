@@ -232,8 +232,12 @@ export async function getUserSettings(userId: string): Promise<UserSettings | nu
 export async function updateUserSettings(userId: string, settings: Partial<UserSettings>): Promise<void> {
   const { error } = await supabase
     .from('user_settings')
-    .update(settings)
-    .eq('user_id', userId);
+    .upsert({
+      user_id: userId,
+      ...settings,
+    }, {
+      onConflict: 'user_id',
+    });
 
   if (error) throw error;
 }

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import type { Card } from '../types';
 import { useTheme } from '../hooks/useTheme';
+import { getUserSettings } from '../services/database';
+import { supabase } from '../lib/supabase';
 
 const SHIPPING_PROFILES = [
   'Kleine Hobbybox (bis zu 10 Boosterpacks)',
@@ -40,15 +42,46 @@ export function CardView({ card, confirmedCount, totalCount, onConfirm, isSaving
   const [startingPrice, setStartingPrice] = useState(card.starting_price || 1);
   const [shippingProfile, setShippingProfile] = useState(card.shipping_profile || 'Pack (50 g)');
   const [condition, setCondition] = useState(card.condition || 'Raw - Very Good');
+  const [userDefaults, setUserDefaults] = useState<{
+    shippingProfile: string;
+    condition: string;
+    startingPrice: string;
+  }>({
+    shippingProfile: 'Pack (50 g)',
+    condition: 'Raw - Very Good',
+    startingPrice: '1',
+  });
+
+  // Load user settings on mount
+  useEffect(() => {
+    const loadUserSettings = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const settings = await getUserSettings(user.id);
+          if (settings) {
+            setUserDefaults({
+              shippingProfile: settings.versandprofil || 'Pack (50 g)',
+              condition: settings.zustand || 'Raw - Very Good',
+              startingPrice: settings.preis || '1',
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load user settings:', err);
+      }
+    };
+    loadUserSettings();
+  }, []);
 
   // Reset local state when card changes
   useEffect(() => {
     setTitle(card.ai_title);
     setDescription(card.ai_description);
-    setStartingPrice(card.starting_price || 1);
-    setShippingProfile(card.shipping_profile || 'Pack (50 g)');
-    setCondition(card.condition || 'Raw - Very Good');
-  }, [card]);
+    setStartingPrice(card.starting_price || parseInt(userDefaults.startingPrice) || 1);
+    setShippingProfile(card.shipping_profile || userDefaults.shippingProfile);
+    setCondition(card.condition || userDefaults.condition);
+  }, [card, userDefaults]);
 
   const handleSubmit = () => {
     const hasUnknown = 

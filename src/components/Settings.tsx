@@ -85,6 +85,16 @@ export function Settings({ userId, onLogout, onBack }: SettingsProps) {
           versandprofil: settings.versandprofil,
           zustand: settings.zustand,
         });
+      } else {
+        // Use database defaults if no settings exist
+        setSettingsForm({
+          kategorie: 'Sportkarten',
+          unterkategorie: 'Fußball Singles',
+          verkaufsformat: 'Auction',
+          preis: '1',
+          versandprofil: 'Pack (50 g)',
+          zustand: 'Raw - Very Good',
+        });
       }
 
       const stats = await getUsageStats(userId);

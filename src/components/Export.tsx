@@ -37,18 +37,18 @@ export function Export({ sessionId, isReExport, onNewSession, onBackToShows, onL
       }
 
       const userSettings = await getUserSettings(user.id);
-      if (!userSettings) {
-        throw new Error('User settings not found');
-      }
+      
+      // Use database defaults if user settings don't exist
+      const csvSettings = {
+        kategorie: userSettings?.kategorie || 'Sportkarten',
+        unterkategorie: userSettings?.unterkategorie || 'Fußball Singles',
+        verkaufsformat: userSettings?.verkaufsformat || 'Auction',
+        preis: userSettings?.preis || '1',
+        versandprofil: userSettings?.versandprofil || 'Pack (50 g)',
+        zustand: userSettings?.zustand || 'Raw - Very Good',
+      };
 
-      const csv = generateCSV(cards, {
-        kategorie: userSettings.kategorie || 'Sportkarten',
-        unterkategorie: userSettings.unterkategorie || 'Fußball Singles',
-        verkaufsformat: userSettings.verkaufsformat || 'Auction',
-        preis: userSettings.preis || '1',
-        versandprofil: userSettings.versandprofil || 'Pack (50 g)',
-        zustand: userSettings.zustand || 'Raw - Very Good',
-      });
+      const csv = generateCSV(cards, csvSettings);
       downloadCSV(csv);
       
       // Only complete session if this is not a re-export
