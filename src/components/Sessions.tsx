@@ -12,12 +12,13 @@ interface SessionsProps {
   onNavigateToSession: (sessionId: string) => void;
   onUploadMore: (sessionId: string) => void;
   onNewSessionCreated: (sessionId: string) => void;
+  onViewCards: (sessionId: string, sessionName: string) => void;
   onLogout: () => void;
   onSettings: () => void;
   refreshTrigger?: number;
 }
 
-export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessionCreated, onLogout, onSettings, refreshTrigger }: SessionsProps) {
+export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessionCreated, onViewCards, onLogout, onSettings, refreshTrigger }: SessionsProps) {
   const { theme, toggleTheme } = useTheme();
   const [sessions, setSessions] = useState<SessionWithCardCount[]>([]);
   const [loading, setLoading] = useState(true);
@@ -239,6 +240,12 @@ export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessi
                     </div>
                   </div>
                   <div className="session-actions">
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => onViewCards(session.id, session.name || 'Untitled Show')}
+                    >
+                      View cards
+                    </button>
                     {session.status === 'in_progress' && (
                       <>
                         <button

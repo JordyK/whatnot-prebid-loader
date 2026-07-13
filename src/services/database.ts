@@ -268,3 +268,55 @@ export async function getUsageStats(userId: string): Promise<{ total: number; th
     thisMonth: monthCount || 0,
   };
 }
+
+export async function getAllCards(sessionId: string): Promise<Card[]> {
+  const { data, error } = await supabase
+    .from('cards')
+    .select('*')
+    .eq('session_id', sessionId)
+    .order('created_at', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function updateCard(
+  cardId: string,
+  updates: {
+    title?: string;
+    description?: string;
+    kategorie?: string;
+    unterkategorie?: string;
+    verkaufsformat?: string;
+    preis?: string;
+    versandprofil?: string;
+    zustand?: string;
+  }
+): Promise<void> {
+  const { error } = await supabase
+    .from('cards')
+    .update({
+      ai_title: updates.title,
+      ai_description: updates.description,
+      final_title: updates.title,
+      final_description: updates.description,
+      kategorie: updates.kategorie,
+      unterkategorie: updates.unterkategorie,
+      verkaufsformat: updates.verkaufsformat,
+      preis: updates.preis,
+      versandprofil: updates.versandprofil,
+      zustand: updates.zustand,
+    })
+    .eq('id', cardId);
+
+  if (error) throw error;
+}
+
+export async function deleteCard(cardId: string): Promise<void> {
+  const { error } = await supabase
+    .from('cards')
+    .delete()
+    .eq('id', cardId);
+
+  if (error) throw error;
+}

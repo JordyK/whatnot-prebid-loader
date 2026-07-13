@@ -78,9 +78,15 @@ export function CardView({ card, confirmedCount, totalCount, onConfirm, isSaving
   useEffect(() => {
     setTitle(card.ai_title);
     setDescription(card.ai_description);
-    setStartingPrice(card.starting_price || parseInt(userDefaults.startingPrice) || 1);
-    setShippingProfile(card.shipping_profile || userDefaults.shippingProfile);
-    setCondition(card.condition || userDefaults.condition);
+    
+    // Use user defaults if card doesn't have explicit values
+    const price = card.starting_price ? card.starting_price : parseInt(userDefaults.startingPrice) || 1;
+    const shipping = card.shipping_profile ? card.shipping_profile : userDefaults.shippingProfile;
+    const cond = card.condition ? card.condition : userDefaults.condition;
+    
+    setStartingPrice(price);
+    setShippingProfile(shipping);
+    setCondition(cond);
   }, [card, userDefaults]);
 
   const handleSubmit = () => {

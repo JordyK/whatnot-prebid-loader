@@ -9,6 +9,7 @@ import { CardView } from './components/CardView';
 import { Export } from './components/Export';
 import { Loading } from './components/Loading';
 import { Settings } from './components/Settings';
+import { ShowOverview } from './components/ShowOverview';
 
 type AppState = 
   | { type: 'auth' }
@@ -16,6 +17,7 @@ type AppState =
   | { type: 'upload'; sessionId: string }
   | { type: 'review'; sessionId: string; cards: Card[]; currentIndex: number; isSaving: boolean }
   | { type: 'export'; sessionId: string; isReExport: boolean }
+  | { type: 'overview'; sessionId: string; sessionName: string }
   | { type: 'settings' }
   | { type: 'loading' }
   | { type: 'error'; message: string };
@@ -126,6 +128,10 @@ export function App() {
     setState({ type: 'sessions' });
   }, []);
 
+  const handleViewCards = useCallback((sessionId: string, sessionName: string) => {
+    setState({ type: 'overview', sessionId, sessionName });
+  }, []);
+
   const handleUploadComplete = (sessionId: string) => {
     loadPendingCards(sessionId);
   };
@@ -210,6 +216,7 @@ export function App() {
         onNavigateToSession={handleNavigateToSession}
         onUploadMore={handleUploadMore}
         onNewSessionCreated={handleNewSessionCreated}
+        onViewCards={handleViewCards}
         onLogout={handleLogout}
         onSettings={handleSettings}
         refreshTrigger={sessionsRefreshTrigger}
@@ -252,6 +259,18 @@ export function App() {
         onNewSession={handleBackToSessions}
         onBackToShows={handleBackToSessions}
         onLogout={handleLogout}
+      />
+    );
+  }
+
+  if (state.type === 'overview') {
+    return (
+      <ShowOverview 
+        sessionId={state.sessionId}
+        sessionName={state.sessionName}
+        onBack={handleBackToSessions}
+        onLogout={handleLogout}
+        onSettings={handleSettings}
       />
     );
   }
