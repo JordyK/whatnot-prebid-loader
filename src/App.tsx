@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './hooks/useAuth';
-import { getPendingCardCount, getPendingCards, confirmCard, getConfirmedCards } from './services/database';
+import { getPendingCardCount, getPendingCards, confirmCard, getConfirmedCards, completeSession } from './services/database';
 import type { Card } from './types';
 import { Auth } from './components/Auth';
 import { Sessions } from './components/Sessions';
@@ -176,7 +176,8 @@ export function App() {
           isSaving: false 
         });
       } else {
-        // All cards confirmed, go to export
+        // All cards confirmed, complete the session and go to export
+        await completeSession(sessionId);
         setState({ type: 'export', sessionId, isReExport: false });
       }
     } catch (error) {
