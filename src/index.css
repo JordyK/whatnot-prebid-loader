@@ -889,6 +889,28 @@ body {
   transform: scale(1.05);
 }
 
+/* Logout icon button */
+.logout-icon-btn {
+  position: absolute;
+  top: 20px;
+  right: 120px;
+  padding: 8px 12px;
+  background: var(--glass-fill);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 101;
+}
+
+.logout-icon-btn:hover {
+  background: var(--glass-fill-elevated);
+  transform: scale(1.05);
+}
+
 /* Settings screen */
 .settings-container {
   flex: 1;

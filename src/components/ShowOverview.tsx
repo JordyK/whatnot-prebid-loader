@@ -89,7 +89,7 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
       kategorie: card.kategorie || '',
       unterkategorie: card.unterkategorie || '',
       verkaufsformat: card.verkaufsformat || '',
-      preis: card.preis || '',
+      preis: card.starting_price?.toString() || card.preis || '',
       versandprofil: card.versandprofil || '',
       zustand: card.zustand || '',
     });
@@ -178,11 +178,15 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
         >
           {theme === 'dark' ? '☀️' : '🌙'}
         </button>
+        <button
+          className="logout-icon-btn"
+          onClick={onLogout}
+          aria-label="Log out"
+        >
+          🚪
+        </button>
         <button className="btn btn-secondary btn-sm" onClick={onBack}>
           ← Back
-        </button>
-        <button className="logout-btn" onClick={onLogout}>
-          Log out
         </button>
         <div className="sessions-loading">Loading cards...</div>
       </div>
@@ -206,11 +210,15 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
         >
           {theme === 'dark' ? '☀️' : '🌙'}
         </button>
+        <button
+          className="logout-icon-btn"
+          onClick={onLogout}
+          aria-label="Log out"
+        >
+          🚪
+        </button>
         <button className="btn btn-secondary btn-sm" onClick={onBack}>
           ← Back
-        </button>
-        <button className="logout-btn" onClick={onLogout}>
-          Log out
         </button>
         <div className="sessions-error">{error}</div>
       </div>
@@ -234,11 +242,15 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
         >
           {theme === 'dark' ? '☀️' : '🌙'}
         </button>
+        <button
+          className="logout-icon-btn"
+          onClick={onLogout}
+          aria-label="Log out"
+        >
+          🚪
+        </button>
         <button className="btn btn-secondary btn-sm" onClick={onBack}>
           ← Back
-        </button>
-        <button className="logout-btn" onClick={onLogout}>
-          Log out
         </button>
         <div className="sessions-empty">
           <div className="empty-icon">📭</div>
@@ -264,11 +276,15 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
       >
         {theme === 'dark' ? '☀️' : '🌙'}
       </button>
+      <button
+        className="logout-icon-btn"
+        onClick={onLogout}
+        aria-label="Log out"
+      >
+        🚪
+      </button>
       <button className="btn btn-secondary btn-sm" onClick={onBack}>
         ← Back
-      </button>
-      <button className="logout-btn" onClick={onLogout}>
-        Log out
       </button>
 
       <div className="show-overview-content">
@@ -381,30 +397,6 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
                   className="field-input"
                   rows={3}
                   disabled={saving}
-                />
-              </div>
-              
-              <div className="field-group">
-                <label className="field-label">Category</label>
-                <input
-                  type="text"
-                  value={editForm.kategorie}
-                  onChange={(e) => setEditForm({ ...editForm, kategorie: e.target.value })}
-                  className="field-input"
-                  disabled={saving}
-                  placeholder="e.g. Sportkarten"
-                />
-              </div>
-              
-              <div className="field-group">
-                <label className="field-label">Subcategory</label>
-                <input
-                  type="text"
-                  value={editForm.unterkategorie}
-                  onChange={(e) => setEditForm({ ...editForm, unterkategorie: e.target.value })}
-                  className="field-input"
-                  disabled={saving}
-                  placeholder="e.g. Fußball Singles"
                 />
               </div>
               
