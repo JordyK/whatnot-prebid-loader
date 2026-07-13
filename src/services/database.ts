@@ -285,8 +285,6 @@ export async function updateCard(
   updates: {
     title?: string;
     description?: string;
-    kategorie?: string;
-    unterkategorie?: string;
     verkaufsformat?: string;
     preis?: string;
     versandprofil?: string;
@@ -300,8 +298,6 @@ export async function updateCard(
       ai_description: updates.description,
       final_title: updates.title,
       final_description: updates.description,
-      kategorie: updates.kategorie,
-      unterkategorie: updates.unterkategorie,
       verkaufsformat: updates.verkaufsformat,
       preis: updates.preis,
       versandprofil: updates.versandprofil,
