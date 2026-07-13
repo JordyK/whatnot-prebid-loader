@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { getConfirmedCards, completeSession, getUserSettings } from '../services/database';
+import { getConfirmedCards, getUserSettings } from '../services/database';
 import { generateCSV, downloadCSV } from '../utils/csvExport';
 import { useTheme } from '../hooks/useTheme';
 import { supabase } from '../lib/supabase';
@@ -50,11 +50,6 @@ export function Export({ sessionId, isReExport, onNewSession, onBackToShows, onL
 
       const csv = generateCSV(cards, csvSettings);
       downloadCSV(csv);
-      
-      // Only complete session if this is not a re-export
-      if (!isReExport) {
-        await completeSession(sessionId);
-      }
       
       setExported(true);
     } catch (err: any) {
