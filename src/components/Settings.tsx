@@ -184,19 +184,23 @@ export function Settings({ userId, onLogout, onBack }: SettingsProps) {
 
   return (
     <div className="settings-container">
-      <button
-        className="theme-toggle"
-        onClick={toggleTheme}
-        aria-label="Toggle theme"
-      >
-        {theme === 'dark' ? '☀️' : '🌙'}
-      </button>
-      <button className="btn btn-secondary btn-sm" onClick={onBack}>
-        ← Back
-      </button>
-      <button className="logout-btn" onClick={onLogout}>
-        Log out
-      </button>
+      <div className="settings-header">
+        <button className="btn btn-secondary btn-sm" onClick={onBack}>
+          ← Back
+        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            className="settings-btn"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+          <button className="logout-btn" onClick={onLogout}>
+            Log out
+          </button>
+        </div>
+      </div>
 
       <div className="settings-content">
         <h1 className="settings-title">Settings</h1>
