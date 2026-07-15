@@ -4,6 +4,26 @@ import type { Card } from '../types';
 import { StatusBadge } from './StatusBadge';
 import { useTheme } from '../hooks/useTheme';
 
+const SHIPPING_PROFILES = [
+  'Kleine Hobbybox (bis zu 10 Boosterpacks)',
+  'Mittlere Hobbybox (bis zu 24 Boosterpacks)',
+  'Große Hobbybox (bis zu 36 Boosterpacks)',
+  'Kleiner Break Spot (max. 15 Karten)',
+  'Mittlerer Break Spot (max. 30 Karten)',
+  'Großer Break Spot (max. 60 Karten)',
+  'Single (15 g)',
+  'Slab (90 g)',
+  'Pack (50 g)',
+];
+
+const CONDITIONS = [
+  'Graded',
+  'Raw - Near Mint or Better',
+  'Raw - Excellent',
+  'Raw - Very Good',
+  'Raw - Poor',
+];
+
 interface ShowOverviewProps {
   sessionId: string;
   sessionName: string;
@@ -23,6 +43,7 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
   const [editForm, setEditForm] = useState({
     title: '',
     description: '',
+    starting_price: '',
     shipping_profile: '',
     condition: '',
     sold_price: '',
@@ -62,6 +83,7 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
     setEditForm({
       title: card.final_title || card.ai_title,
       description: card.final_description || card.ai_description,
+      starting_price: card.starting_price?.toString() || '',
       shipping_profile: card.shipping_profile || '',
       condition: card.condition || '',
       sold_price: card.sold_price?.toString() || '',
@@ -79,7 +101,11 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
 
     try {
       await updateCard(editingCard.id, {
-        ...editForm,
+        title: editForm.title,
+        description: editForm.description,
+        starting_price: editForm.starting_price ? parseFloat(editForm.starting_price) : null,
+        shipping_profile: editForm.shipping_profile,
+        condition: editForm.condition,
         sold_price: editForm.sold_price ? parseFloat(editForm.sold_price) : null,
       });
       setSaveSuccess(true);
@@ -93,6 +119,7 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
               ai_description: editForm.description,
               final_title: editForm.title,
               final_description: editForm.description,
+              starting_price: editForm.starting_price ? parseFloat(editForm.starting_price) : null,
               shipping_profile: editForm.shipping_profile,
               condition: editForm.condition,
               sold_price: editForm.sold_price ? parseFloat(editForm.sold_price) : null,
@@ -424,25 +451,47 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
               </div>
 
               <div className="field-group">
-                <label className="field-label">Shipping Profile</label>
+                <label className="field-label">Starting Price</label>
                 <input
-                  type="text"
-                  value={editForm.shipping_profile}
-                  onChange={(e) => setEditForm({ ...editForm, shipping_profile: e.target.value })}
+                  type="number"
+                  value={editForm.starting_price}
+                  onChange={(e) => setEditForm({ ...editForm, starting_price: e.target.value })}
                   className="field-input"
                   disabled={saving}
+                  placeholder="e.g. 1"
                 />
               </div>
 
               <div className="field-group">
+                <label className="field-label">Shipping Profile</label>
+                <select
+                  value={editForm.shipping_profile}
+                  onChange={(e) => setEditForm({ ...editForm, shipping_profile: e.target.value })}
+                  className="field-input"
+                  disabled={saving}
+                >
+                  {SHIPPING_PROFILES.map((profile) => (
+                    <option key={profile} value={profile}>
+                      {profile}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="field-group">
                 <label className="field-label">Condition</label>
-                <input
-                  type="text"
+                <select
                   value={editForm.condition}
                   onChange={(e) => setEditForm({ ...editForm, condition: e.target.value })}
                   className="field-input"
                   disabled={saving}
-                />
+                >
+                  {CONDITIONS.map((cond) => (
+                    <option key={cond} value={cond}>
+                      {cond}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="field-group">

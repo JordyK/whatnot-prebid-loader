@@ -291,6 +291,7 @@ export async function updateCard(
   updates: {
     title?: string;
     description?: string;
+    starting_price?: number | null;
     shipping_profile?: string;
     condition?: string;
     sold_price?: number | null;
@@ -303,6 +304,7 @@ export async function updateCard(
       ai_description: updates.description,
       final_title: updates.title,
       final_description: updates.description,
+      starting_price: updates.starting_price,
       shipping_profile: updates.shipping_profile,
       condition: updates.condition,
       sold_price: updates.sold_price,
