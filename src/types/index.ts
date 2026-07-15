@@ -36,6 +36,7 @@ export interface Card {
   preis: string | null;
   versandprofil: string | null;
   zustand: string | null;
+  sold_price: number | null;
 }
 
 // n8n process card webhook response

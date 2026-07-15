@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAllCards, updateCard, deleteCard } from '../services/database';
+import { getAllCards, updateCard, deleteCard, importSalesPdf } from '../services/database';
 import type { Card } from '../types';
 import { StatusBadge } from './StatusBadge';
 import { useTheme } from '../hooks/useTheme';
@@ -53,6 +53,7 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
     preis: '',
     versandprofil: '',
     zustand: '',
+    sold_price: '',
   });
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -61,6 +62,11 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
   // Delete confirmation state
   const [deletingCard, setDeletingCard] = useState<Card | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Sales import state
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<{ matched: number; total: number; unmatched?: string[] } | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
 
   useEffect(() => {
     loadCards();
@@ -88,6 +94,7 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
       preis: card.starting_price?.toString() || card.preis || '',
       versandprofil: card.versandprofil || '',
       zustand: card.zustand || '',
+      sold_price: card.sold_price?.toString() || '',
     });
     setSaveError(null);
     setSaveSuccess(false);
@@ -101,7 +108,10 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
     setSaveSuccess(false);
     
     try {
-      await updateCard(editingCard.id, editForm);
+      await updateCard(editingCard.id, {
+        ...editForm,
+        sold_price: editForm.sold_price ? parseFloat(editForm.sold_price) : null,
+      });
       setSaveSuccess(true);
       
       // Update local state
@@ -117,6 +127,7 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
               preis: editForm.preis,
               versandprofil: editForm.versandprofil,
               zustand: editForm.zustand,
+              sold_price: editForm.sold_price ? parseFloat(editForm.sold_price) : null,
             }
           : card
       ));
@@ -134,6 +145,32 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
 
   const handleDelete = (card: Card) => {
     setDeletingCard(card);
+  };
+
+  const handleImportSales = async () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/pdf';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      setImporting(true);
+      setImportError(null);
+      setImportResult(null);
+
+      try {
+        const result = await importSalesPdf(sessionId, file);
+        setImportResult(result);
+        // Refetch cards to show sold prices
+        await loadCards();
+      } catch (err: any) {
+        setImportError(err.message || 'Failed to import sales');
+      } finally {
+        setImporting(false);
+      }
+    };
+    input.click();
   };
 
   const confirmDelete = async () => {
@@ -282,7 +319,48 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
       </button>
 
       <div className="show-overview-content">
-        <h1 className="show-overview-title">{sessionName || 'Show Overview'}</h1>
+        <div className="show-overview-header">
+          <h1 className="show-overview-title">{sessionName || 'Show Overview'}</h1>
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={handleImportSales}
+            disabled={importing}
+          >
+            {importing ? 'Importing...' : 'Import Sales PDF'}
+          </button>
+        </div>
+
+        {importError && (
+          <div className="settings-error">
+            <StatusBadge status="danger" icon="⚠" label={importError} />
+          </div>
+        )}
+
+        {importResult && (
+          <div className="import-result glass-panel">
+            <div className="import-summary">
+              <StatusBadge
+                status="success"
+                icon="✓"
+                label={`${importResult.matched} of ${importResult.total} items matched`}
+              />
+            </div>
+            {importResult.unmatched && importResult.unmatched.length > 0 && (
+              <div className="import-unmatched">
+                <p className="import-unmatched-title">Unmatched items:</p>
+                <ul className="import-unmatched-list">
+                  {importResult.unmatched.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+                <p className="import-unmatched-note">
+                  These weren't found as cards in this session — check for typos or edits made after export.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="show-overview-grid">
           {cards.map((card) => (
             <div key={card.id} className="card-grid-item glass-panel">
@@ -308,15 +386,22 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
                     🗑️
                   </button>
                 </div>
-                {card.status === 'pending_review' && (
-                  <div className="card-grid-status">
+                <div className="card-grid-status">
+                  {card.sold_price && (
+                    <StatusBadge
+                      status="success"
+                      icon="💰"
+                      label={`Sold · €${card.sold_price}`}
+                    />
+                  )}
+                  {card.status === 'pending_review' && !card.sold_price && (
                     <StatusBadge
                       status="info"
                       icon="⏳"
                       label="Pending"
                     />
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
               <div className="card-grid-details">
                 <h3 className="card-grid-title">{getCardTitle(card)}</h3>
@@ -452,6 +537,19 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div className="field-group">
+                <label className="field-label">Selling price (optional)</label>
+                <input
+                  type="number"
+                  value={editForm.sold_price}
+                  onChange={(e) => setEditForm({ ...editForm, sold_price: e.target.value })}
+                  className="field-input"
+                  disabled={saving}
+                  placeholder="e.g. 25.50"
+                  step="0.01"
+                />
               </div>
             </div>
             

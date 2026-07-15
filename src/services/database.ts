@@ -1,6 +1,12 @@
 import { supabase } from '../lib/supabase';
 import type { Session, Card } from '../types';
 
+export interface ImportSalesResponse {
+  matched: number;
+  total: number;
+  unmatched?: string[];
+}
+
 export async function createSession(userId: string, name: string): Promise<Session> {
   const { data, error } = await supabase
     .from('sessions')
@@ -289,6 +295,7 @@ export async function updateCard(
     preis?: string;
     versandprofil?: string;
     zustand?: string;
+    sold_price?: number | null;
   }
 ): Promise<void> {
   const { error } = await supabase
@@ -302,6 +309,7 @@ export async function updateCard(
       preis: updates.preis,
       versandprofil: updates.versandprofil,
       zustand: updates.zustand,
+      sold_price: updates.sold_price,
     })
     .eq('id', cardId);
 
@@ -315,4 +323,30 @@ export async function deleteCard(cardId: string): Promise<void> {
     .eq('id', cardId);
 
   if (error) throw error;
+}
+
+export async function importSalesPdf(sessionId: string, file: File): Promise<ImportSalesResponse> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) {
+    throw new Error('Not authenticated');
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('session_id', sessionId);
+
+  const response = await fetch(import.meta.env.VITE_IMPORT_SALES_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${session.access_token}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Import failed: ${response.statusText}`);
+  }
+
+  const data: ImportSalesResponse = await response.json();
+  return data;
 }
