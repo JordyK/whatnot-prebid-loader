@@ -4,32 +4,6 @@ import type { Card } from '../types';
 import { StatusBadge } from './StatusBadge';
 import { useTheme } from '../hooks/useTheme';
 
-const SALES_FORMATS = [
-  'Auction',
-  'Buy it Now',
-  'Giveaway',
-];
-
-const SHIPPING_PROFILES = [
-  'Kleine Hobbybox (bis zu 10 Boosterpacks)',
-  'Mittlere Hobbybox (bis zu 24 Boosterpacks)',
-  'Große Hobbybox (bis zu 36 Boosterpacks)',
-  'Kleiner Break Spot (max. 15 Karten)',
-  'Mittlerer Break Spot (max. 30 Karten)',
-  'Großer Break Spot (max. 60 Karten)',
-  'Single (15 g)',
-  'Slab (90 g)',
-  'Pack (50 g)',
-];
-
-const CONDITIONS = [
-  'Graded',
-  'Raw - Near Mint or Better',
-  'Raw - Excellent',
-  'Raw - Very Good',
-  'Raw - Poor',
-];
-
 interface ShowOverviewProps {
   sessionId: string;
   sessionName: string;
@@ -49,10 +23,8 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
   const [editForm, setEditForm] = useState({
     title: '',
     description: '',
-    verkaufsformat: '',
-    preis: '',
-    versandprofil: '',
-    zustand: '',
+    shipping_profile: '',
+    condition: '',
     sold_price: '',
   });
   const [saving, setSaving] = useState(false);
@@ -90,10 +62,8 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
     setEditForm({
       title: card.final_title || card.ai_title,
       description: card.final_description || card.ai_description,
-      verkaufsformat: card.verkaufsformat || '',
-      preis: card.starting_price?.toString() || card.preis || '',
-      versandprofil: card.versandprofil || '',
-      zustand: card.zustand || '',
+      shipping_profile: card.shipping_profile || '',
+      condition: card.condition || '',
       sold_price: card.sold_price?.toString() || '',
     });
     setSaveError(null);
@@ -102,36 +72,34 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
 
   const handleSaveEdit = async () => {
     if (!editingCard) return;
-    
+
     setSaving(true);
     setSaveError(null);
     setSaveSuccess(false);
-    
+
     try {
       await updateCard(editingCard.id, {
         ...editForm,
         sold_price: editForm.sold_price ? parseFloat(editForm.sold_price) : null,
       });
       setSaveSuccess(true);
-      
+
       // Update local state
-      setCards(cards.map(card => 
-        card.id === editingCard.id 
-          ? { 
-              ...card, 
+      setCards(cards.map(card =>
+        card.id === editingCard.id
+          ? {
+              ...card,
               ai_title: editForm.title,
               ai_description: editForm.description,
               final_title: editForm.title,
               final_description: editForm.description,
-              verkaufsformat: editForm.verkaufsformat,
-              preis: editForm.preis,
-              versandprofil: editForm.versandprofil,
-              zustand: editForm.zustand,
+              shipping_profile: editForm.shipping_profile,
+              condition: editForm.condition,
               sold_price: editForm.sold_price ? parseFloat(editForm.sold_price) : null,
             }
           : card
       ));
-      
+
       setTimeout(() => {
         setEditingCard(null);
         setSaveSuccess(false);
@@ -407,40 +375,16 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
                 <h3 className="card-grid-title">{getCardTitle(card)}</h3>
                 <p className="card-grid-description">{getCardDescription(card)}</p>
                 <div className="card-grid-fields">
-                  {card.kategorie && (
-                    <div className="card-grid-field">
-                      <span className="card-grid-field-label">Category:</span>
-                      <span className="card-grid-field-value">{card.kategorie}</span>
-                    </div>
-                  )}
-                  {card.unterkategorie && (
-                    <div className="card-grid-field">
-                      <span className="card-grid-field-label">Subcategory:</span>
-                      <span className="card-grid-field-value">{card.unterkategorie}</span>
-                    </div>
-                  )}
-                  {card.verkaufsformat && (
-                    <div className="card-grid-field">
-                      <span className="card-grid-field-label">Format:</span>
-                      <span className="card-grid-field-value">{card.verkaufsformat}</span>
-                    </div>
-                  )}
-                  {card.preis && (
-                    <div className="card-grid-field">
-                      <span className="card-grid-field-label">Price:</span>
-                      <span className="card-grid-field-value">{card.preis}</span>
-                    </div>
-                  )}
-                  {card.versandprofil && (
+                  {card.shipping_profile && (
                     <div className="card-grid-field">
                       <span className="card-grid-field-label">Shipping:</span>
-                      <span className="card-grid-field-value">{card.versandprofil}</span>
+                      <span className="card-grid-field-value">{card.shipping_profile}</span>
                     </div>
                   )}
-                  {card.zustand && (
+                  {card.condition && (
                     <div className="card-grid-field">
                       <span className="card-grid-field-label">Condition:</span>
-                      <span className="card-grid-field-value">{card.zustand}</span>
+                      <span className="card-grid-field-value">{card.condition}</span>
                     </div>
                   )}
                 </div>
@@ -478,65 +422,27 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
                   disabled={saving}
                 />
               </div>
-              
-              <div className="field-group">
-                <label className="field-label">Sales Format</label>
-                <select
-                  value={editForm.verkaufsformat}
-                  onChange={(e) => setEditForm({ ...editForm, verkaufsformat: e.target.value })}
-                  className="field-input"
-                  disabled={saving}
-                >
-                  {SALES_FORMATS.map((format) => (
-                    <option key={format} value={format}>
-                      {format}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="field-group">
-                <label className="field-label">Price</label>
-                <input
-                  type="text"
-                  value={editForm.preis}
-                  onChange={(e) => setEditForm({ ...editForm, preis: e.target.value })}
-                  className="field-input"
-                  disabled={saving}
-                  placeholder="e.g. 1"
-                />
-              </div>
-              
+
               <div className="field-group">
                 <label className="field-label">Shipping Profile</label>
-                <select
-                  value={editForm.versandprofil}
-                  onChange={(e) => setEditForm({ ...editForm, versandprofil: e.target.value })}
+                <input
+                  type="text"
+                  value={editForm.shipping_profile}
+                  onChange={(e) => setEditForm({ ...editForm, shipping_profile: e.target.value })}
                   className="field-input"
                   disabled={saving}
-                >
-                  {SHIPPING_PROFILES.map((profile) => (
-                    <option key={profile} value={profile}>
-                      {profile}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
-              
+
               <div className="field-group">
                 <label className="field-label">Condition</label>
-                <select
-                  value={editForm.zustand}
-                  onChange={(e) => setEditForm({ ...editForm, zustand: e.target.value })}
+                <input
+                  type="text"
+                  value={editForm.condition}
+                  onChange={(e) => setEditForm({ ...editForm, condition: e.target.value })}
                   className="field-input"
                   disabled={saving}
-                >
-                  {CONDITIONS.map((cond) => (
-                    <option key={cond} value={cond}>
-                      {cond}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div className="field-group">

@@ -291,10 +291,8 @@ export async function updateCard(
   updates: {
     title?: string;
     description?: string;
-    verkaufsformat?: string;
-    preis?: string;
-    versandprofil?: string;
-    zustand?: string;
+    shipping_profile?: string;
+    condition?: string;
     sold_price?: number | null;
   }
 ): Promise<void> {
@@ -305,10 +303,8 @@ export async function updateCard(
       ai_description: updates.description,
       final_title: updates.title,
       final_description: updates.description,
-      verkaufsformat: updates.verkaufsformat,
-      preis: updates.preis,
-      versandprofil: updates.versandprofil,
-      zustand: updates.zustand,
+      shipping_profile: updates.shipping_profile,
+      condition: updates.condition,
       sold_price: updates.sold_price,
     })
     .eq('id', cardId);

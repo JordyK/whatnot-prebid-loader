@@ -30,12 +30,6 @@ export interface Card {
   status: CardStatus;
   processed_at: string | null;
   created_at: string;
-  kategorie: string | null;
-  unterkategorie: string | null;
-  verkaufsformat: string | null;
-  preis: string | null;
-  versandprofil: string | null;
-  zustand: string | null;
   sold_price: number | null;
 }
 
