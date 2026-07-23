@@ -89,7 +89,7 @@ export function Settings({ userId, onLogout, onBack }: SettingsProps) {
         // Use database defaults if no settings exist
         setSettingsForm({
           kategorie: 'Sportkarten',
-          unterkategorie: 'Fußball Singles',
+          unterkategorie: 'Soccer Singles',
           verkaufsformat: 'Auction',
           preis: '1',
           versandprofil: 'Pack (50 g)',

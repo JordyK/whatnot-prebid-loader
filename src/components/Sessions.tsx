@@ -83,7 +83,7 @@ export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessi
       // Use database defaults if user settings don't exist
       const csvSettings = {
         kategorie: userSettings?.kategorie || 'Sportkarten',
-        unterkategorie: userSettings?.unterkategorie || 'Fußball Singles',
+        unterkategorie: userSettings?.unterkategorie || 'Soccer Singles',
         verkaufsformat: userSettings?.verkaufsformat || 'Auction',
         preis: userSettings?.preis || '1',
         versandprofil: userSettings?.versandprofil || 'Pack (50 g)',
