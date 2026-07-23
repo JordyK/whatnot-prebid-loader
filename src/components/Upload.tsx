@@ -74,6 +74,11 @@ export function Upload({ sessionId, onUploadComplete, onLogout, onSettings }: Up
           console.log(`Successfully processed ${file.name}`);
           successCount++;
           setProcessed(i + 1);
+
+          // Small delay between files to prevent overwhelming
+          if (i < files.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
         } catch (err) {
           console.error(`Failed to process ${file.name}:`, err);
           setFailed((prev) => [...prev, file.name]);
@@ -82,8 +87,9 @@ export function Upload({ sessionId, onUploadComplete, onLogout, onSettings }: Up
 
       console.log(`Upload complete. Processed: ${successCount}, Failed: ${failed.length}, Total: ${files.length}`);
 
-      // Only call onUploadComplete if at least one file succeeded
+      // Only call onUploadComplete after ALL files have been processed
       if (successCount > 0) {
+        console.log('Calling onUploadComplete');
         onUploadComplete(sessionId);
       } else {
         setError('All files failed to process');
@@ -92,6 +98,7 @@ export function Upload({ sessionId, onUploadComplete, onLogout, onSettings }: Up
       console.error('Upload error:', err);
       setError(err.message || 'Failed to process files');
     } finally {
+      console.log('Setting processing to false');
       setProcessing(false);
     }
   };
