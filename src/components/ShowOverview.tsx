@@ -61,9 +61,28 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
   const [importResult, setImportResult] = useState<{ matched: number; total: number; unmatched?: string[] } | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
 
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+
   useEffect(() => {
     loadCards();
   }, [sessionId]);
+
+  // Filter cards based on search query
+  const filteredCards = cards.filter(card => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      card.file_name?.toLowerCase().includes(query) ||
+      card.ai_title?.toLowerCase().includes(query) ||
+      card.final_title?.toLowerCase().includes(query) ||
+      card.ai_description?.toLowerCase().includes(query) ||
+      card.final_description?.toLowerCase().includes(query) ||
+      card.brand_set?.toLowerCase().includes(query) ||
+      card.player_name?.toLowerCase().includes(query) ||
+      card.serial_number?.toLowerCase().includes(query)
+    );
+  });
 
   const loadCards = async () => {
     setLoading(true);
@@ -316,13 +335,22 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
       <div className="show-overview-content">
         <div className="show-overview-header">
           <h1 className="show-overview-title">{sessionName || 'Show Overview'}</h1>
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={handleImportSales}
-            disabled={importing}
-          >
-            {importing ? 'Importing...' : 'Import Sales PDF'}
-          </button>
+          <div className="show-overview-actions">
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search cards..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={handleImportSales}
+              disabled={importing}
+            >
+              {importing ? 'Importing...' : 'Import Sales PDF'}
+            </button>
+          </div>
         </div>
 
         {importError && (
@@ -357,7 +385,7 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
         )}
 
         <div className="show-overview-grid">
-          {cards.map((card) => (
+          {filteredCards.map((card) => (
             <div key={card.id} className="card-grid-item glass-panel">
               <div className="card-grid-image-wrapper">
                 <img 
