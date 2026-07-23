@@ -265,13 +265,21 @@ export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessi
                       </>
                     )}
                     {session.status === 'completed' && (
-                      <button
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => handleExportAgain(session.id)}
-                        disabled={exportingSession === session.id}
-                      >
-                        {exportingSession === session.id ? 'Exporting...' : 'Export again'}
-                      </button>
+                      <>
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => onUploadMore(session.id)}
+                        >
+                          Upload More
+                        </button>
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => handleExportAgain(session.id)}
+                          disabled={exportingSession === session.id}
+                        >
+                          {exportingSession === session.id ? 'Exporting...' : 'Export again'}
+                        </button>
+                      </>
                     )}
                     <button
                       className="btn btn-danger btn-sm"
