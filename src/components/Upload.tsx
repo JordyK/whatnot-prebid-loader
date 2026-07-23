@@ -51,10 +51,13 @@ export function Upload({ sessionId, onUploadComplete, onLogout, onSettings }: Up
     setError(null);
     setFailed([]);
 
+    let successCount = 0;
+
     try {
       // Process files one at a time
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
+        console.log(`Processing file ${i + 1}/${files.length}: ${file.name}`);
         try {
           const result = await processCard(file);
           await insertCard(sessionId, {
@@ -68,6 +71,8 @@ export function Upload({ sessionId, onUploadComplete, onLogout, onSettings }: Up
             needs_review: result.needs_review,
             review_reason: result.review_reason,
           });
+          console.log(`Successfully processed ${file.name}`);
+          successCount++;
           setProcessed(i + 1);
         } catch (err) {
           console.error(`Failed to process ${file.name}:`, err);
@@ -75,8 +80,16 @@ export function Upload({ sessionId, onUploadComplete, onLogout, onSettings }: Up
         }
       }
 
-      onUploadComplete(sessionId);
+      console.log(`Upload complete. Processed: ${successCount}, Failed: ${failed.length}, Total: ${files.length}`);
+
+      // Only call onUploadComplete if at least one file succeeded
+      if (successCount > 0) {
+        onUploadComplete(sessionId);
+      } else {
+        setError('All files failed to process');
+      }
     } catch (err: any) {
+      console.error('Upload error:', err);
       setError(err.message || 'Failed to process files');
     } finally {
       setProcessing(false);
