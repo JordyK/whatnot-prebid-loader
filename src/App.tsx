@@ -32,6 +32,7 @@ export function App() {
   const [state, setState] = useState<AppState>({ type: 'loading' });
   const [sessionsRefreshTrigger, setSessionsRefreshTrigger] = useState(0);
   const [teamId, setTeamId] = useState<string | null>(null);
+  const [useTeamMode, setUseTeamMode] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -43,23 +44,33 @@ export function App() {
 
     const initializeUser = async () => {
       try {
-        // Check for pending invites
-        const pendingInvites = await getPendingInvites(user.email);
-        if (pendingInvites.length > 0) {
-          setState({ type: 'invite', invite: pendingInvites[0] });
-          return;
-        }
+        // Try team mode first
+        try {
+          // Check for pending invites
+          const pendingInvites = await getPendingInvites(user.email);
+          if (pendingInvites.length > 0) {
+            setState({ type: 'invite', invite: pendingInvites[0] });
+            return;
+          }
 
-        // Get user's team
-        const userTeam = await getUserTeam(user.id);
-        if (!userTeam) {
-          setState({ type: 'error', message: 'No team found. Your account may not be set up for team access yet. Please contact support.' });
-          return;
+          // Get user's team
+          const userTeam = await getUserTeam(user.id);
+          if (userTeam) {
+            // Store team info and role
+            setTeamId(userTeam.team.id);
+            setTeamRole(userTeam.member.role);
+            setUseTeamMode(true);
+          } else {
+            // No team found, fall back to user mode
+            console.log('No team found, using user mode');
+            setTeamRole('owner'); // Default to owner permissions in user mode
+            setUseTeamMode(false);
+          }
+        } catch (teamError) {
+          console.log('Team lookup failed, using user mode:', teamError);
+          setTeamRole('owner'); // Default to owner permissions in user mode
+          setUseTeamMode(false);
         }
-
-        // Store team info and role
-        setTeamId(userTeam.team.id);
-        setTeamRole(userTeam.member.role);
 
         // Check URL for session parameter
         const urlParams = new URLSearchParams(window.location.search);
@@ -256,7 +267,9 @@ export function App() {
   if (state.type === 'sessions') {
     return (
       <Sessions
-        teamId={teamId!}
+        teamId={teamId}
+        userId={user!.id}
+        useTeamMode={useTeamMode}
         onNavigateToSession={handleNavigateToSession}
         onUploadMore={handleUploadMore}
         onNewSessionCreated={handleNewSessionCreated}

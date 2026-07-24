@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getTeamSessions, createSession, deleteSession, getUserSettings } from '../services/database';
+import { getTeamSessions, getUserSessions, createSession, deleteSession, getUserSettings } from '../services/database';
 import type { SessionWithCardCount } from '../services/database';
 import { getConfirmedCards } from '../services/database';
 import { generateCSV, downloadCSV } from '../utils/csvExport';
@@ -9,7 +9,9 @@ import { StatusBadge } from './StatusBadge';
 import { supabase } from '../lib/supabase';
 
 interface SessionsProps {
-  teamId: string;
+  teamId: string | null;
+  userId: string;
+  useTeamMode: boolean;
   onNavigateToSession: (sessionId: string) => void;
   onUploadMore: (sessionId: string) => void;
   onNewSessionCreated: (sessionId: string) => void;
@@ -19,7 +21,7 @@ interface SessionsProps {
   refreshTrigger?: number;
 }
 
-export function Sessions({ teamId, onNavigateToSession, onUploadMore, onNewSessionCreated, onViewCards, onLogout, onSettings, refreshTrigger }: SessionsProps) {
+export function Sessions({ teamId, userId, useTeamMode, onNavigateToSession, onUploadMore, onNewSessionCreated, onViewCards, onLogout, onSettings, refreshTrigger }: SessionsProps) {
   const { theme, toggleTheme } = useTheme();
   const { canConfirm, canDelete } = useTeamRole();
   const [sessions, setSessions] = useState<SessionWithCardCount[]>([]);
@@ -33,13 +35,18 @@ export function Sessions({ teamId, onNavigateToSession, onUploadMore, onNewSessi
 
   useEffect(() => {
     loadSessions();
-  }, [teamId, refreshTrigger]);
+  }, [teamId, userId, useTeamMode, refreshTrigger]);
 
   const loadSessions = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getTeamSessions(teamId);
+      let data;
+      if (useTeamMode && teamId) {
+        data = await getTeamSessions(teamId);
+      } else {
+        data = await getUserSessions(userId);
+      }
       setSessions(data);
     } catch (err: any) {
       setError(err.message || 'Failed to load shows');
@@ -60,7 +67,7 @@ export function Sessions({ teamId, onNavigateToSession, onUploadMore, onNewSessi
       if (!user) {
         throw new Error('Not authenticated');
       }
-      const session = await createSession(user.id, newShowName.trim(), teamId);
+      const session = await createSession(user.id, newShowName.trim(), useTeamMode ? teamId : undefined);
       onNewSessionCreated(session.id);
     } catch (err: any) {
       console.error('Failed to create show:', err);
