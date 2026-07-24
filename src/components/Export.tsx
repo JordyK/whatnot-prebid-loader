@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { getConfirmedCards, getUserSettings } from '../services/database';
 import { generateCSV, downloadCSV } from '../utils/csvExport';
-import { useTheme } from '../hooks/useTheme';
 import { supabase } from '../lib/supabase';
+import { HeaderBar } from './HeaderBar';
 
 interface ExportProps {
   sessionId: string;
@@ -13,7 +13,6 @@ interface ExportProps {
 }
 
 export function Export({ sessionId, isReExport, onNewSession, onBackToShows, onLogout }: ExportProps) {
-  const { theme, toggleTheme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [exported, setExported] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,16 +60,7 @@ export function Export({ sessionId, isReExport, onNewSession, onBackToShows, onL
 
   return (
     <div className="export-container">
-      <button
-        className="theme-toggle"
-        onClick={toggleTheme}
-        aria-label="Toggle theme"
-      >
-        {theme === 'dark' ? '☀️' : '🌙'}
-      </button>
-      <button className="logout-icon-btn" onClick={onLogout} aria-label="Log out">
-        🚪
-      </button>
+      <HeaderBar onLogout={onLogout} />
 
       <div className="export-content glass-panel">
         <h1 className="export-title">

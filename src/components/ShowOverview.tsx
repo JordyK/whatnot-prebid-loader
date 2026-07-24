@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getAllCards, updateCard, deleteCard, importSalesPdf } from '../services/database';
 import type { Card } from '../types';
 import { StatusBadge } from './StatusBadge';
-import { useTheme } from '../hooks/useTheme';
+import { HeaderBar } from './HeaderBar';
 import { useTeamRole } from '../hooks/useTeamRole';
 
 const SHIPPING_PROFILES = [
@@ -34,7 +34,6 @@ interface ShowOverviewProps {
 }
 
 export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSettings }: ShowOverviewProps) {
-  const { theme, toggleTheme } = useTheme();
   const { canEdit, canDelete } = useTeamRole();
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
@@ -211,30 +210,7 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
   if (loading) {
     return (
       <div className="show-overview-container">
-        <button
-          className="settings-btn"
-          onClick={onSettings}
-          aria-label="Settings"
-        >
-          ⚙️
-        </button>
-        <button
-          className="theme-toggle"
-          onClick={toggleTheme}
-          aria-label="Toggle theme"
-        >
-          {theme === 'dark' ? '☀️' : '🌙'}
-        </button>
-        <button
-          className="logout-icon-btn"
-          onClick={onLogout}
-          aria-label="Log out"
-        >
-          🚪
-        </button>
-        <button className="btn btn-secondary btn-sm" onClick={onBack}>
-          ← Back
-        </button>
+        <HeaderBar onBack={onBack} onSettings={onSettings} onLogout={onLogout} />
         <div className="sessions-loading">Loading cards...</div>
       </div>
     );
@@ -243,30 +219,7 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
   if (error) {
     return (
       <div className="show-overview-container">
-        <button
-          className="settings-btn"
-          onClick={onSettings}
-          aria-label="Settings"
-        >
-          ⚙️
-        </button>
-        <button
-          className="theme-toggle"
-          onClick={toggleTheme}
-          aria-label="Toggle theme"
-        >
-          {theme === 'dark' ? '☀️' : '🌙'}
-        </button>
-        <button
-          className="logout-icon-btn"
-          onClick={onLogout}
-          aria-label="Log out"
-        >
-          🚪
-        </button>
-        <button className="btn btn-secondary btn-sm" onClick={onBack}>
-          ← Back
-        </button>
+        <HeaderBar onBack={onBack} onSettings={onSettings} onLogout={onLogout} />
         <div className="sessions-error">{error}</div>
       </div>
     );
@@ -275,30 +228,7 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
   if (cards.length === 0) {
     return (
       <div className="show-overview-container">
-        <button
-          className="settings-btn"
-          onClick={onSettings}
-          aria-label="Settings"
-        >
-          ⚙️
-        </button>
-        <button
-          className="theme-toggle"
-          onClick={toggleTheme}
-          aria-label="Toggle theme"
-        >
-          {theme === 'dark' ? '☀️' : '🌙'}
-        </button>
-        <button
-          className="logout-icon-btn"
-          onClick={onLogout}
-          aria-label="Log out"
-        >
-          🚪
-        </button>
-        <button className="btn btn-secondary btn-sm" onClick={onBack}>
-          ← Back
-        </button>
+        <HeaderBar onBack={onBack} onSettings={onSettings} onLogout={onLogout} />
         <div className="sessions-empty">
           <div className="empty-icon">📭</div>
           <div className="empty-text">No cards in this show</div>
@@ -309,30 +239,7 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
 
   return (
     <div className="show-overview-container">
-      <button
-        className="settings-btn"
-        onClick={onSettings}
-        aria-label="Settings"
-      >
-        ⚙️
-      </button>
-      <button
-        className="theme-toggle"
-        onClick={toggleTheme}
-        aria-label="Toggle theme"
-      >
-        {theme === 'dark' ? '☀️' : '🌙'}
-      </button>
-      <button
-        className="logout-icon-btn"
-        onClick={onLogout}
-        aria-label="Log out"
-      >
-        🚪
-      </button>
-      <button className="btn btn-secondary btn-sm" onClick={onBack}>
-        ← Back
-      </button>
+      <HeaderBar onBack={onBack} onSettings={onSettings} onLogout={onLogout} />
 
       <div className="show-overview-content">
         <div className="show-overview-header">

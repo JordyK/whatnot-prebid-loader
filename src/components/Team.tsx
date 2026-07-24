@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getTeamMembers, sendInvite, updateMemberRole, removeMember } from '../services/database';
 import { useTeamRole } from '../hooks/useTeamRole';
-import { useTheme } from '../hooks/useTheme';
+import { HeaderBar } from './HeaderBar';
 import type { TeamMember } from '../services/database';
 
 interface TeamProps {
@@ -11,7 +11,6 @@ interface TeamProps {
 }
 
 export function Team({ teamId, onBack, onLogout }: TeamProps) {
-  const { theme, toggleTheme } = useTheme();
   const { canInvite, canManageMembers } = useTeamRole();
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,22 +81,9 @@ export function Team({ teamId, onBack, onLogout }: TeamProps) {
 
   return (
     <div className="upload-container">
-      <button
-        className="theme-toggle"
-        onClick={toggleTheme}
-        aria-label="Toggle theme"
-      >
-        {theme === 'dark' ? '☀️' : '🌙'}
-      </button>
-      <button className="logout-icon-btn" onClick={onLogout} aria-label="Log out">
-        🚪
-      </button>
+      <HeaderBar onBack={onBack} onLogout={onLogout} />
 
       <div className="upload-content">
-        <button className="btn btn-secondary btn-sm" onClick={onBack}>
-          ← Back
-        </button>
-
         <h1 className="upload-title">Team Management</h1>
 
         {error && <div className="settings-error">{error}</div>}

@@ -3,9 +3,9 @@ import { getTeamSessions, getUserSessions, createSession, deleteSession, getUser
 import type { SessionWithCardCount } from '../services/database';
 import { getConfirmedCards } from '../services/database';
 import { generateCSV, downloadCSV } from '../utils/csvExport';
-import { useTheme } from '../hooks/useTheme';
 import { useTeamRole } from '../hooks/useTeamRole';
 import { StatusBadge } from './StatusBadge';
+import { HeaderBar } from './HeaderBar';
 import { supabase } from '../lib/supabase';
 
 interface SessionsProps {
@@ -22,7 +22,6 @@ interface SessionsProps {
 }
 
 export function Sessions({ teamId, userId, useTeamMode, onNavigateToSession, onUploadMore, onNewSessionCreated, onViewCards, onLogout, onSettings, refreshTrigger }: SessionsProps) {
-  const { theme, toggleTheme } = useTheme();
   const { canConfirm, canDelete } = useTeamRole();
   const [sessions, setSessions] = useState<SessionWithCardCount[]>([]);
   const [loading, setLoading] = useState(true);
@@ -141,23 +140,7 @@ export function Sessions({ teamId, userId, useTeamMode, onNavigateToSession, onU
   if (loading) {
     return (
       <div className="sessions-container">
-        <button
-          className="settings-btn"
-          onClick={onSettings}
-          aria-label="Settings"
-        >
-          ⚙️
-        </button>
-        <button
-          className="theme-toggle"
-          onClick={toggleTheme}
-          aria-label="Toggle theme"
-        >
-          {theme === 'dark' ? '☀️' : '🌙'}
-        </button>
-        <button className="logout-icon-btn" onClick={onLogout} aria-label="Log out">
-          🚪
-        </button>
+        <HeaderBar onSettings={onSettings} onLogout={onLogout} />
         <div className="sessions-loading">Loading shows...</div>
       </div>
     );
@@ -165,23 +148,7 @@ export function Sessions({ teamId, userId, useTeamMode, onNavigateToSession, onU
 
   return (
     <div className="sessions-container">
-      <button
-        className="settings-btn"
-        onClick={onSettings}
-        aria-label="Settings"
-      >
-        ⚙️
-      </button>
-      <button
-        className="theme-toggle"
-        onClick={toggleTheme}
-        aria-label="Toggle theme"
-      >
-        {theme === 'dark' ? '☀️' : '🌙'}
-      </button>
-      <button className="logout-icon-btn" onClick={onLogout} aria-label="Log out">
-        🚪
-      </button>
+      <HeaderBar onSettings={onSettings} onLogout={onLogout} />
 
       <div className="sessions-content">
         <h1 className="sessions-title">Shows</h1>

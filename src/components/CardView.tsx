@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Card } from '../types';
-import { useTheme } from '../hooks/useTheme';
+import { HeaderBar } from './HeaderBar';
 import { useTeamRole } from '../hooks/useTeamRole';
 import { getUserSettings } from '../services/database';
 import { supabase } from '../lib/supabase';
@@ -37,7 +37,6 @@ interface CardViewProps {
 }
 
 export function CardView({ card, confirmedCount, totalCount, onConfirm, isSaving, onLogout, onBack, onSettings }: CardViewProps) {
-  const { theme, toggleTheme } = useTheme();
   const { canConfirm } = useTeamRole();
   const [title, setTitle] = useState(card.ai_title);
   const [description, setDescription] = useState(card.ai_description);
@@ -110,28 +109,7 @@ export function CardView({ card, confirmedCount, totalCount, onConfirm, isSaving
 
   return (
     <div className="card-view">
-      <div className="card-header">
-        <button
-          className="settings-btn"
-          onClick={onSettings}
-          aria-label="Settings"
-        >
-          ⚙️
-        </button>
-        <button
-          className="theme-toggle"
-          onClick={toggleTheme}
-          aria-label="Toggle theme"
-        >
-          {theme === 'dark' ? '☀️' : '🌙'}
-        </button>
-        <button className="btn btn-secondary btn-sm" onClick={onBack}>
-          ← Back
-        </button>
-        <button className="logout-icon-btn" onClick={onLogout} aria-label="Log out">
-          🚪
-        </button>
-      </div>
+      <HeaderBar onBack={onBack} onSettings={onSettings} onLogout={onLogout} />
 
       <div className="progress-container">
         <div className="progress-counter">

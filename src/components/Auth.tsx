@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useTheme } from '../hooks/useTheme';
+import { HeaderBar } from './HeaderBar';
 
 interface AuthProps {
   onSignIn: (email: string, password: string) => Promise<void>;
@@ -7,7 +7,6 @@ interface AuthProps {
 }
 
 export function Auth({ onSignIn, onSignUp }: AuthProps) {
-  const { theme, toggleTheme } = useTheme();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,13 +33,7 @@ export function Auth({ onSignIn, onSignUp }: AuthProps) {
 
   return (
     <div className="auth-container">
-      <button
-        className="theme-toggle"
-        onClick={toggleTheme}
-        aria-label="Toggle theme"
-      >
-        {theme === 'dark' ? '☀️' : '🌙'}
-      </button>
+      <HeaderBar />
       <div className="auth-content glass-panel">
         <h1 className="auth-title">Whatnot Prebid Loader</h1>
         <p className="auth-subtitle">

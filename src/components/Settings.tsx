@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { getUserSettings, updateUserSettings, getUsageStats, type UserSettings } from '../services/database';
 import { deleteAccount } from '../services/accountService';
-import { useTheme } from '../hooks/useTheme';
 import { StatusBadge } from './StatusBadge';
+import { HeaderBar } from './HeaderBar';
 
 const SALES_FORMATS = [
   'Auction',
@@ -39,7 +39,6 @@ interface SettingsProps {
 }
 
 export function Settings({ userId, onLogout, onBack, onTeam }: SettingsProps) {
-  const { theme, toggleTheme } = useTheme();
   const [email, setEmail] = useState<string>('');
   const [userSettings, setUserSettings] = useState<UserSettings | null>(null);
   const [usageStats, setUsageStats] = useState<{ total: number; thisMonth: number } | null>(null);
@@ -185,23 +184,7 @@ export function Settings({ userId, onLogout, onBack, onTeam }: SettingsProps) {
 
   return (
     <div className="settings-container">
-      <div className="settings-header">
-        <button className="btn btn-secondary btn-sm" onClick={onBack}>
-          ← Back
-        </button>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button
-            className="settings-btn"
-            onClick={toggleTheme}
-            aria-label="Toggle theme"
-          >
-            {theme === 'dark' ? '☀️' : '🌙'}
-          </button>
-          <button className="logout-icon-btn" onClick={onLogout} aria-label="Log out">
-            🚪
-          </button>
-        </div>
-      </div>
+      <HeaderBar onBack={onBack} onLogout={onLogout} />
 
       <div className="settings-content">
         <h1 className="settings-title">Settings</h1>
