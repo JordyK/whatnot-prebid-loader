@@ -67,7 +67,7 @@ export function Sessions({ teamId, userId, useTeamMode, onNavigateToSession, onU
       if (!user) {
         throw new Error('Not authenticated');
       }
-      const session = await createSession(user.id, newShowName.trim(), useTeamMode ? teamId : undefined);
+      const session = await createSession(user.id, newShowName.trim(), useTeamMode && teamId ? teamId : undefined);
       onNewSessionCreated(session.id);
     } catch (err: any) {
       console.error('Failed to create show:', err);

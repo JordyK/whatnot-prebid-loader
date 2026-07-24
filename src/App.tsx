@@ -47,7 +47,7 @@ export function App() {
         // Try team mode first
         try {
           // Check for pending invites
-          const pendingInvites = await getPendingInvites(user.email);
+          const pendingInvites = await getPendingInvites(user.email ?? '');
           if (pendingInvites.length > 0) {
             setState({ type: 'invite', invite: pendingInvites[0] });
             return;
