@@ -7,10 +7,33 @@ export interface ImportSalesResponse {
   unmatched?: string[];
 }
 
-export async function createSession(userId: string, name: string): Promise<Session> {
+export interface Team {
+  id: string;
+  name: string;
+  created_at: string;
+}
+
+export interface TeamMember {
+  id: string;
+  team_id: string;
+  user_id: string;
+  role: 'owner' | 'upload_only';
+  email: string;
+  created_at: string;
+}
+
+export interface TeamInvite {
+  id: string;
+  team_id: string;
+  email: string;
+  role: 'owner' | 'upload_only';
+  created_at: string;
+}
+
+export async function createSession(userId: string, name: string, teamId?: string): Promise<Session> {
   const { data, error } = await supabase
     .from('sessions')
-    .insert({ user_id: userId, name, status: 'in_progress' })
+    .insert({ user_id: userId, name, status: 'in_progress', team_id: teamId })
     .select()
     .single();
 
@@ -347,4 +370,174 @@ export async function importSalesPdf(sessionId: string, file: File): Promise<Imp
 
   const data: ImportSalesResponse = await response.json();
   return data;
+}
+
+// Team-related functions
+export async function getUserTeam(userId: string): Promise<{ team: Team; member: TeamMember } | null> {
+  const { data, error } = await supabase
+    .from('team_members')
+    .select(`
+      *,
+      team:teams(*)
+    `)
+    .eq('user_id', userId)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') return null; // No rows returned
+    throw error;
+  }
+
+  return {
+    team: data.team,
+    member: {
+      id: data.id,
+      team_id: data.team_id,
+      user_id: data.user_id,
+      role: data.role,
+      email: data.email,
+      created_at: data.created_at,
+    },
+  };
+}
+
+export async function getTeamMembers(teamId: string): Promise<TeamMember[]> {
+  const { data, error } = await supabase
+    .from('team_members')
+    .select('*')
+    .eq('team_id', teamId)
+    .order('created_at', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function sendInvite(teamId: string, email: string, role: 'owner' | 'upload_only'): Promise<void> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) {
+    throw new Error('Not authenticated');
+  }
+
+  const SEND_INVITE_URL = import.meta.env.VITE_SEND_INVITE_URL;
+  if (!SEND_INVITE_URL) {
+    throw new Error('Missing VITE_SEND_INVITE_URL environment variable');
+  }
+
+  const response = await fetch(SEND_INVITE_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      team_id: teamId,
+      email,
+      role,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to send invite: ${response.statusText}`);
+  }
+}
+
+export async function acceptInvite(inviteId: string): Promise<void> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) {
+    throw new Error('Not authenticated');
+  }
+
+  const ACCEPT_INVITE_URL = import.meta.env.VITE_ACCEPT_INVITE_URL;
+  if (!ACCEPT_INVITE_URL) {
+    throw new Error('Missing VITE_ACCEPT_INVITE_URL environment variable');
+  }
+
+  const response = await fetch(ACCEPT_INVITE_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      invite_id: inviteId,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to accept invite: ${response.statusText}`);
+  }
+}
+
+export async function getPendingInvites(email: string): Promise<TeamInvite[]> {
+  const { data, error } = await supabase
+    .from('team_invites')
+    .select('*')
+    .eq('email', email)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function updateMemberRole(memberId: string, role: 'owner' | 'upload_only'): Promise<void> {
+  const { error } = await supabase
+    .from('team_members')
+    .update({ role })
+    .eq('id', memberId);
+
+  if (error) throw error;
+}
+
+export async function removeMember(memberId: string): Promise<void> {
+  const { error } = await supabase
+    .from('team_members')
+    .delete()
+    .eq('id', memberId);
+
+  if (error) throw error;
+}
+
+export async function getTeamSessions(teamId: string): Promise<SessionWithCardCount[]> {
+  const { data: sessions, error: sessionsError } = await supabase
+    .from('sessions')
+    .select('*')
+    .eq('team_id', teamId)
+    .order('created_at', { ascending: false });
+
+  if (sessionsError) throw sessionsError;
+
+  if (!sessions || sessions.length === 0) {
+    return [];
+  }
+
+  // Get all card counts in a single query using group by
+  const sessionIds = sessions.map(s => s.id);
+  const { data: cardCounts, error: cardCountsError } = await supabase
+    .from('cards')
+    .select('session_id, status')
+    .in('session_id', sessionIds);
+
+  if (cardCountsError) throw cardCountsError;
+
+  // Calculate counts per session
+  const countsMap = new Map<string, { total: number; pending: number }>();
+  (cardCounts || []).forEach(card => {
+    const current = countsMap.get(card.session_id) || { total: 0, pending: 0 };
+    current.total++;
+    if (card.status === 'pending_review') {
+      current.pending++;
+    }
+    countsMap.set(card.session_id, current);
+  });
+
+  const sessionsWithCounts = sessions.map(session => {
+    const counts = countsMap.get(session.id) || { total: 0, pending: 0 };
+    return {
+      ...session,
+      card_count: counts.total,
+      pending_count: counts.pending,
+    };
+  });
+
+  return sessionsWithCounts;
 }

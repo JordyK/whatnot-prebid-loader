@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './hooks/useAuth';
-import { getPendingCardCount, getPendingCards, confirmCard, getConfirmedCards, completeSession } from './services/database';
+import { useTeamRole } from './hooks/useTeamRole';
+import { getPendingCardCount, getPendingCards, confirmCard, getConfirmedCards, completeSession, getUserTeam, getPendingInvites, acceptInvite } from './services/database';
 import type { Card } from './types';
 import { Auth } from './components/Auth';
 import { Sessions } from './components/Sessions';
@@ -10,8 +11,9 @@ import { Export } from './components/Export';
 import { Loading } from './components/Loading';
 import { Settings } from './components/Settings';
 import { ShowOverview } from './components/ShowOverview';
+import { Team } from './components/Team';
 
-type AppState = 
+type AppState =
   | { type: 'auth' }
   | { type: 'sessions' }
   | { type: 'upload'; sessionId: string }
@@ -19,13 +21,17 @@ type AppState =
   | { type: 'export'; sessionId: string; isReExport: boolean }
   | { type: 'overview'; sessionId: string; sessionName: string }
   | { type: 'settings' }
+  | { type: 'team' }
+  | { type: 'invite'; invite: any }
   | { type: 'loading' }
   | { type: 'error'; message: string };
 
 export function App() {
   const { user, loading: authLoading, signIn, signUp, signOut } = useAuth();
+  const { setTeamRole } = useTeamRole();
   const [state, setState] = useState<AppState>({ type: 'loading' });
   const [sessionsRefreshTrigger, setSessionsRefreshTrigger] = useState(0);
+  const [teamId, setTeamId] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -35,39 +41,58 @@ export function App() {
       return;
     }
 
-    // Check URL for session parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = urlParams.get('session');
+    const initializeUser = async () => {
+      try {
+        // Check for pending invites
+        const pendingInvites = await getPendingInvites(user.email);
+        if (pendingInvites.length > 0) {
+          setState({ type: 'invite', invite: pendingInvites[0] });
+          return;
+        }
 
-    const determineRoute = async () => {
-      if (sessionId) {
-        try {
-          const pendingCount = await getPendingCardCount(sessionId);
-          const confirmedCards = await getConfirmedCards(sessionId);
+        // Get user's team
+        const userTeam = await getUserTeam(user.id);
+        if (!userTeam) {
+          setState({ type: 'error', message: 'No team found. Please contact support.' });
+          return;
+        }
 
-          if (pendingCount > 0) {
-            // Has pending cards → fetch them and show review screen
-            const pendingCards = await getPendingCards(sessionId);
-            setState({ type: 'review', sessionId, cards: pendingCards, currentIndex: 0, isSaving: false });
-          } else if (confirmedCards.length > 0) {
-            // All confirmed → show export screen
-            setState({ type: 'export', sessionId, isReExport: true });
-          } else {
-            // Zero cards → show upload screen (reuse empty session)
-            setState({ type: 'upload', sessionId });
+        // Store team info and role
+        setTeamId(userTeam.team.id);
+        setTeamRole(userTeam.member.role);
+
+        // Check URL for session parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session');
+
+        if (sessionId) {
+          try {
+            const pendingCount = await getPendingCardCount(sessionId);
+            const confirmedCards = await getConfirmedCards(sessionId);
+
+            if (pendingCount > 0) {
+              const pendingCards = await getPendingCards(sessionId);
+              setState({ type: 'review', sessionId, cards: pendingCards, currentIndex: 0, isSaving: false });
+            } else if (confirmedCards.length > 0) {
+              setState({ type: 'export', sessionId, isReExport: true });
+            } else {
+              setState({ type: 'upload', sessionId });
+            }
+          } catch (error) {
+            console.error('Error loading session:', error);
+            setState({ type: 'sessions' });
           }
-        } catch (error) {
-          console.error('Error loading session:', error);
+        } else {
           setState({ type: 'sessions' });
         }
-      } else {
-        // No session parameter → show sessions screen
-        setState({ type: 'sessions' });
+      } catch (error) {
+        console.error('Error initializing user:', error);
+        setState({ type: 'error', message: 'Failed to initialize. Please try again.' });
       }
     };
 
-    determineRoute();
-  }, [user, authLoading]);
+    initializeUser();
+  }, [user, authLoading, setTeamRole]);
 
   const handleSignIn = useCallback(async (email: string, password: string) => {
     await signIn(email, password);
@@ -126,6 +151,24 @@ export function App() {
 
   const handleBackFromSettings = useCallback(() => {
     setState({ type: 'sessions' });
+  }, []);
+
+  const handleTeam = useCallback(() => {
+    setState({ type: 'team' });
+  }, []);
+
+  const handleAcceptInvite = useCallback(async (inviteId: string) => {
+    try {
+      await acceptInvite(inviteId);
+      // Reload the page to reinitialize with the new team
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to accept invite:', error);
+    }
+  }, []);
+
+  const handleDeclineInvite = useCallback(() => {
+    setState({ type: 'error', message: 'Please contact the team owner to remove the invite.' });
   }, []);
 
   const handleViewCards = useCallback((sessionId: string, sessionName: string) => {
@@ -212,8 +255,8 @@ export function App() {
 
   if (state.type === 'sessions') {
     return (
-      <Sessions 
-        userId={user!.id}
+      <Sessions
+        teamId={teamId!}
         onNavigateToSession={handleNavigateToSession}
         onUploadMore={handleUploadMore}
         onNewSessionCreated={handleNewSessionCreated}
@@ -278,11 +321,49 @@ export function App() {
 
   if (state.type === 'settings') {
     return (
-      <Settings 
+      <Settings
         userId={user!.id}
         onLogout={handleLogout}
         onBack={handleBackFromSettings}
+        onTeam={handleTeam}
       />
+    );
+  }
+
+  if (state.type === 'team') {
+    return (
+      <Team
+        teamId={teamId!}
+        onBack={handleBackFromSettings}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  if (state.type === 'invite') {
+    return (
+      <div className="upload-container">
+        <div className="upload-content">
+          <h1 className="upload-title">Team Invitation</h1>
+          <p className="upload-subtitle">
+            You've been invited to join a team
+          </p>
+          <div className="invite-actions">
+            <button
+              className="btn btn-primary"
+              onClick={() => handleAcceptInvite(state.invite.id)}
+            >
+              Accept Invite
+            </button>
+            <button
+              className="btn btn-secondary"
+              onClick={handleDeclineInvite}
+            >
+              Decline
+            </button>
+          </div>
+        </div>
+      </div>
     );
   }
 

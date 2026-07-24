@@ -35,9 +35,10 @@ interface SettingsProps {
   userId: string;
   onLogout: () => void;
   onBack: () => void;
+  onTeam: () => void;
 }
 
-export function Settings({ userId, onLogout, onBack }: SettingsProps) {
+export function Settings({ userId, onLogout, onBack, onTeam }: SettingsProps) {
   const { theme, toggleTheme } = useTheme();
   const [email, setEmail] = useState<string>('');
   const [userSettings, setUserSettings] = useState<UserSettings | null>(null);
@@ -399,6 +400,13 @@ export function Settings({ userId, onLogout, onBack }: SettingsProps) {
             onClick={() => setShowDeleteConfirm(true)}
           >
             Delete Account
+          </button>
+
+          <button
+            className="btn btn-secondary"
+            onClick={onTeam}
+          >
+            Team Management
           </button>
 
           {showDeleteConfirm && (

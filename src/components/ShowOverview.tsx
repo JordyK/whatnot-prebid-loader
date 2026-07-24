@@ -3,6 +3,7 @@ import { getAllCards, updateCard, deleteCard, importSalesPdf } from '../services
 import type { Card } from '../types';
 import { StatusBadge } from './StatusBadge';
 import { useTheme } from '../hooks/useTheme';
+import { useTeamRole } from '../hooks/useTeamRole';
 
 const SHIPPING_PROFILES = [
   'Kleine Hobbybox (bis zu 10 Boosterpacks)',
@@ -34,6 +35,7 @@ interface ShowOverviewProps {
 
 export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSettings }: ShowOverviewProps) {
   const { theme, toggleTheme } = useTheme();
+  const { canEdit, canDelete } = useTeamRole();
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -394,20 +396,24 @@ export function ShowOverview({ sessionId, sessionName, onBack, onLogout, onSetti
                   className="card-grid-image"
                 />
                 <div className="card-grid-actions">
-                  <button
-                    className="card-action-btn"
-                    onClick={() => handleEdit(card)}
-                    aria-label="Edit card"
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    className="card-action-btn card-action-btn-danger"
-                    onClick={() => handleDelete(card)}
-                    aria-label="Delete card"
-                  >
-                    🗑️
-                  </button>
+                  {canEdit && (
+                    <button
+                      className="card-action-btn"
+                      onClick={() => handleEdit(card)}
+                      aria-label="Edit card"
+                    >
+                      ✏️
+                    </button>
+                  )}
+                  {canDelete && (
+                    <button
+                      className="card-action-btn card-action-btn-danger"
+                      onClick={() => handleDelete(card)}
+                      aria-label="Delete card"
+                    >
+                      🗑️
+                    </button>
+                  )}
                 </div>
                 <div className="card-grid-status">
                   {card.sold_price && (

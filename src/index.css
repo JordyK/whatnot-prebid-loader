@@ -1096,6 +1096,89 @@ body {
   color: var(--text-secondary);
 }
 
+/* Team Management Styles */
+.team-section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 24px 0 16px 0;
+}
+
+.team-empty {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.team-members {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.team-member {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+}
+
+.team-member-info {
+  flex: 1;
+}
+
+.team-member-email {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.team-member-role {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.team-member-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.team-role-select {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+}
+
+.team-invite-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--glass-border);
+}
+
+.team-invite-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 400px;
+}
+
+.team-invite-success {
+  color: #10b981;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.invite-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
 .show-overview-title {
   font-family: var(--font-display);
   font-size: 32px;

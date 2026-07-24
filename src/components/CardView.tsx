@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Card } from '../types';
 import { useTheme } from '../hooks/useTheme';
+import { useTeamRole } from '../hooks/useTeamRole';
 import { getUserSettings } from '../services/database';
 import { supabase } from '../lib/supabase';
 
@@ -37,6 +38,7 @@ interface CardViewProps {
 
 export function CardView({ card, confirmedCount, totalCount, onConfirm, isSaving, onLogout, onBack, onSettings }: CardViewProps) {
   const { theme, toggleTheme } = useTheme();
+  const { canConfirm } = useTeamRole();
   const [title, setTitle] = useState(card.ai_title);
   const [description, setDescription] = useState(card.ai_description);
   const [startingPrice, setStartingPrice] = useState(card.starting_price || 1);
@@ -226,14 +228,21 @@ export function CardView({ card, confirmedCount, totalCount, onConfirm, isSaving
         </div>
       </div>
 
-      <button
-        className="btn btn-primary"
-        onClick={handleSubmit}
-        disabled={isSaving}
-        type="button"
-      >
-        {isSaving ? 'Saving...' : 'Confirm'}
-      </button>
+      {canConfirm && (
+        <button
+          className="btn btn-primary"
+          onClick={handleSubmit}
+          disabled={isSaving}
+          type="button"
+        >
+          {isSaving ? 'Saving...' : 'Confirm'}
+        </button>
+      )}
+      {!canConfirm && (
+        <div className="field-info">
+          You have read-only access to this card. Only team owners can confirm cards.
+        </div>
+      )}
     </div>
   );
 }

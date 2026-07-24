@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
-import { getUserSessions, createSession, deleteSession, getUserSettings } from '../services/database';
+import { getTeamSessions, createSession, deleteSession, getUserSettings } from '../services/database';
 import type { SessionWithCardCount } from '../services/database';
 import { getConfirmedCards } from '../services/database';
 import { generateCSV, downloadCSV } from '../utils/csvExport';
 import { useTheme } from '../hooks/useTheme';
+import { useTeamRole } from '../hooks/useTeamRole';
 import { StatusBadge } from './StatusBadge';
 import { supabase } from '../lib/supabase';
 
 interface SessionsProps {
-  userId: string;
+  teamId: string;
   onNavigateToSession: (sessionId: string) => void;
   onUploadMore: (sessionId: string) => void;
   onNewSessionCreated: (sessionId: string) => void;
@@ -18,8 +19,9 @@ interface SessionsProps {
   refreshTrigger?: number;
 }
 
-export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessionCreated, onViewCards, onLogout, onSettings, refreshTrigger }: SessionsProps) {
+export function Sessions({ teamId, onNavigateToSession, onUploadMore, onNewSessionCreated, onViewCards, onLogout, onSettings, refreshTrigger }: SessionsProps) {
   const { theme, toggleTheme } = useTheme();
+  const { canConfirm, canDelete } = useTeamRole();
   const [sessions, setSessions] = useState<SessionWithCardCount[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,13 +33,13 @@ export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessi
 
   useEffect(() => {
     loadSessions();
-  }, [userId, refreshTrigger]);
+  }, [teamId, refreshTrigger]);
 
   const loadSessions = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getUserSessions(userId);
+      const data = await getTeamSessions(teamId);
       setSessions(data);
     } catch (err: any) {
       setError(err.message || 'Failed to load shows');
@@ -54,7 +56,11 @@ export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessi
     setCreatingSession(true);
     setError(null);
     try {
-      const session = await createSession(userId, newShowName.trim());
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Not authenticated');
+      }
+      const session = await createSession(user.id, newShowName.trim(), teamId);
       onNewSessionCreated(session.id);
     } catch (err: any) {
       console.error('Failed to create show:', err);
@@ -246,48 +252,38 @@ export function Sessions({ userId, onNavigateToSession, onUploadMore, onNewSessi
                     >
                       View cards
                     </button>
-                    {session.status === 'in_progress' && (
-                      <>
-                        <button
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => onUploadMore(session.id)}
-                        >
-                          Upload More
-                        </button>
-                        {session.pending_count > 0 && (
-                          <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() => onNavigateToSession(session.id)}
-                          >
-                            Review ({session.pending_count})
-                          </button>
-                        )}
-                      </>
-                    )}
-                    {session.status === 'completed' && (
-                      <>
-                        <button
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => onUploadMore(session.id)}
-                        >
-                          Upload More
-                        </button>
-                        <button
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => handleExportAgain(session.id)}
-                          disabled={exportingSession === session.id}
-                        >
-                          {exportingSession === session.id ? 'Exporting...' : 'Export again'}
-                        </button>
-                      </>
-                    )}
                     <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleDelete(session.id)}
-                      disabled={deletingSession === session.id}
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => onUploadMore(session.id)}
                     >
-                      {deletingSession === session.id ? 'Deleting...' : 'Delete'}
+                      Upload More
                     </button>
+                    {session.status === 'in_progress' && session.pending_count > 0 && canConfirm && (
+                      <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => onNavigateToSession(session.id)}
+                      >
+                        Review ({session.pending_count})
+                      </button>
+                    )}
+                    {session.status === 'completed' && canConfirm && (
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => handleExportAgain(session.id)}
+                        disabled={exportingSession === session.id}
+                      >
+                        {exportingSession === session.id ? 'Exporting...' : 'Export again'}
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleDelete(session.id)}
+                        disabled={deletingSession === session.id}
+                      >
+                        {deletingSession === session.id ? 'Deleting...' : 'Delete'}
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
