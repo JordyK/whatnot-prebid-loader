@@ -197,8 +197,8 @@ export function Settings({ userId, onLogout, onBack, onTeam }: SettingsProps) {
           >
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
-          <button className="logout-btn" onClick={onLogout}>
-            Log out
+          <button className="logout-icon-btn" onClick={onLogout} aria-label="Log out">
+            🚪
           </button>
         </div>
       </div>

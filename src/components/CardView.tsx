@@ -128,8 +128,8 @@ export function CardView({ card, confirmedCount, totalCount, onConfirm, isSaving
         <button className="btn btn-secondary btn-sm" onClick={onBack}>
           ← Back
         </button>
-        <button className="logout-btn" onClick={onLogout}>
-          Log out
+        <button className="logout-icon-btn" onClick={onLogout} aria-label="Log out">
+          🚪
         </button>
       </div>
 

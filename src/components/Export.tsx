@@ -68,8 +68,8 @@ export function Export({ sessionId, isReExport, onNewSession, onBackToShows, onL
       >
         {theme === 'dark' ? '☀️' : '🌙'}
       </button>
-      <button className="logout-btn" onClick={onLogout}>
-        Log out
+      <button className="logout-icon-btn" onClick={onLogout} aria-label="Log out">
+        🚪
       </button>
 
       <div className="export-content glass-panel">

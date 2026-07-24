@@ -119,8 +119,8 @@ export function Upload({ sessionId, onUploadComplete, onLogout, onSettings }: Up
       >
         {theme === 'dark' ? '☀️' : '🌙'}
       </button>
-      <button className="logout-btn" onClick={onLogout}>
-        Log out
+      <button className="logout-icon-btn" onClick={onLogout} aria-label="Log out">
+        🚪
       </button>
 
       <div className="upload-content">

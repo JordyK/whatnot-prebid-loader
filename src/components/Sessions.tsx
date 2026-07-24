@@ -155,8 +155,8 @@ export function Sessions({ teamId, userId, useTeamMode, onNavigateToSession, onU
         >
           {theme === 'dark' ? '☀️' : '🌙'}
         </button>
-        <button className="logout-btn" onClick={onLogout}>
-          Log out
+        <button className="logout-icon-btn" onClick={onLogout} aria-label="Log out">
+          🚪
         </button>
         <div className="sessions-loading">Loading shows...</div>
       </div>
@@ -179,8 +179,8 @@ export function Sessions({ teamId, userId, useTeamMode, onNavigateToSession, onU
       >
         {theme === 'dark' ? '☀️' : '🌙'}
       </button>
-      <button className="logout-btn" onClick={onLogout}>
-        Log out
+      <button className="logout-icon-btn" onClick={onLogout} aria-label="Log out">
+        🚪
       </button>
 
       <div className="sessions-content">
