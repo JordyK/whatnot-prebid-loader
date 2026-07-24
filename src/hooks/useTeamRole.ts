@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export type TeamRole = 'owner' | 'upload_only';
 
@@ -15,15 +15,15 @@ export function useTeamRole() {
     setLoading(false);
   }, []);
 
-  const setTeamRole = (newRole: TeamRole) => {
+  const setTeamRole = useCallback((newRole: TeamRole) => {
     setRole(newRole);
     localStorage.setItem('teamRole', newRole);
-  };
+  }, []);
 
-  const clearTeamRole = () => {
+  const clearTeamRole = useCallback(() => {
     setRole(null);
     localStorage.removeItem('teamRole');
-  };
+  }, []);
 
   const isOwner = role === 'owner';
   const isUploadOnly = role === 'upload_only';

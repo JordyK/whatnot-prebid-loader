@@ -53,7 +53,7 @@ export function App() {
         // Get user's team
         const userTeam = await getUserTeam(user.id);
         if (!userTeam) {
-          setState({ type: 'error', message: 'No team found. Please contact support.' });
+          setState({ type: 'error', message: 'No team found. Your account may not be set up for team access yet. Please contact support.' });
           return;
         }
 
@@ -92,7 +92,7 @@ export function App() {
     };
 
     initializeUser();
-  }, [user, authLoading, setTeamRole]);
+  }, [user, authLoading]);
 
   const handleSignIn = useCallback(async (email: string, password: string) => {
     await signIn(email, password);
